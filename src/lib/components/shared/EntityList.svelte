@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { BaseDocument } from '$lib/server/mongodb/types';
+	import UniverseCreateModal from '../universe/UniverseCreateModal.svelte';
 
 	interface ListItem extends BaseDocument {
 		name?: string;
@@ -16,16 +17,29 @@
 		(item.name || item.title || '').toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
+	let showCreateModal = false;
+
 	function handleCreate() {
-		window.location.href = `/${entityType}/new`;
+		console.log(entityType);
+		if (entityType === 'universes') {
+			showCreateModal = true;
+		} else {
+			window.location.href = `/private/${entityType}/new`;
+		}
+	}
+
+	function handleCreateSubmit(data: { name: string; language: string }) {
+		// Navigate to the new universe page with query parameters
+		const params = new URLSearchParams({ name: data.name, language: data.language });
+		window.location.href = `/private/universes/new?${params.toString()}`;
 	}
 
 	function handleEdit(id: string) {
-		window.location.href = `/${entityType}/${id}/edit`;
+		window.location.href = `/private/${entityType}/${id}/edit`;
 	}
 
 	function handleView(id: string) {
-		window.location.href = `/${entityType}/${id}`;
+		window.location.href = `/private/${entityType}/${id}`;
 	}
 
 	// Placeholder delete function
@@ -90,3 +104,11 @@
 		</table>
 	</div>
 </div>
+
+{#if entityType === 'universes'}
+	<UniverseCreateModal
+		bind:show={showCreateModal}
+		onClose={() => (showCreateModal = false)}
+		onSubmit={handleCreateSubmit}
+	/>
+{/if}

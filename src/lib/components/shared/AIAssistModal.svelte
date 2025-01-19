@@ -8,6 +8,7 @@
 	export let onApply: (changes: Partial<LLMContext>) => void;
 	export let entityType: 'universe' | 'character' | 'plot' | 'location' | 'event';
 	export let currentData: Record<string, any> | undefined = undefined;
+	export let universeId: string | undefined = undefined;
 
 	/**
 	 * A list of "quick adjust" options passed in from the parent,
@@ -42,7 +43,8 @@
 					prompt: customInstructions,
 					currentData,
 					quickAdjustments: Array.from(selectedAdjustments),
-					additionalContext: {}
+					additionalContext: {},
+					universeId
 				})
 			});
 

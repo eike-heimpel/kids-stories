@@ -69,6 +69,13 @@ export abstract class AIService {
                 }
             }
         };
+        console.log(this.formatPrompt(request));
+
+        // Get language from current data if it exists
+        const language = (request.currentData as any)?.language;
+        const systemPrompt = language
+            ? `You are a helpful AI that identifies which fields should be updated based on user prompts. Only select fields that are directly relevant to the user's request. You MUST respond in ${language} language only.`
+            : 'You are a helpful AI that identifies which fields should be updated based on user prompts. Only select fields that are directly relevant to the user\'s request.';
 
         const response = await this.openai.chat.completions.create({
             model: this.config.model,
@@ -77,7 +84,7 @@ export abstract class AIService {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are a helpful AI that identifies which fields should be updated based on user prompts. Only select fields that are directly relevant to the user\'s request.'
+                    content: systemPrompt
                 },
                 {
                     role: 'user',
@@ -96,7 +103,7 @@ export abstract class AIService {
         if (!functionCall?.arguments) {
             throw new Error('Invalid field selection response');
         }
-        console.log('Field selection response:', functionCall.arguments);
+
         return JSON.parse(functionCall.arguments);
     }
 
@@ -107,6 +114,12 @@ export abstract class AIService {
         // Create a schema that only includes the fields we want to update
         const restrictedSchema = this.createRestrictedSchema(fieldsToUpdate);
 
+        // Get language from current data if it exists
+        const language = (request.currentData as any)?.language;
+        const systemPrompt = language
+            ? `You are a helpful AI that generates content for ${request.entityType} fields. Only generate content for the specified fields. You MUST respond in ${language} language only.`
+            : `You are a helpful AI that generates content for ${request.entityType} fields. Only generate content for the specified fields.`;
+
         const response = await this.openai.chat.completions.create({
             model: this.config.model,
             temperature: this.config.temperature,
@@ -114,7 +127,7 @@ export abstract class AIService {
             messages: [
                 {
                     role: 'system',
-                    content: `You are a helpful AI that generates content for ${request.entityType} fields. Only generate content for the specified fields.`
+                    content: systemPrompt
                 },
                 {
                     role: 'user',

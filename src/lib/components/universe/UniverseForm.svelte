@@ -2,10 +2,19 @@
 	import type { Universe } from '$lib/server/mongodb/types';
 	import LLMContextForm from '../shared/LLMContextForm.svelte';
 	import AIAssistModal from '../shared/AIAssistModal.svelte';
+	import { page } from '$app/stores';
 
 	export let universe: Universe;
 	export let onSubmit: (data: Universe) => void;
 	export let onCancel: () => void;
+
+	// Get query parameters if they exist
+	$: if ($page?.url?.searchParams) {
+		const name = $page.url.searchParams.get('name');
+		const language = $page.url.searchParams.get('language');
+		if (name && !universe.name) universe.name = name;
+		if (language && !universe.language) universe.language = language;
+	}
 
 	let isSubmitting = false;
 	let showAIAssist = false;
@@ -99,9 +108,8 @@
 			type="button"
 			class="btn btn-outline btn-primary gap-2"
 			on:click={() => (showAIAssist = true)}
-			disabled={isSubmitting}
+			disabled={isSubmitting || (!universe.name && !universe.language)}
 		>
-			<span class="text-xl">✨</span>
 			AI Assist
 		</button>
 	</div>
@@ -111,6 +119,16 @@
 			<span class="label-text">Universe Name</span>
 		</label>
 		<input type="text" id="name" class="input input-bordered" bind:value={universe.name} required />
+	</div>
+
+	<div class="form-control">
+		<label class="label" for="language">
+			<span class="label-text">Language</span>
+		</label>
+		{#if !universe.language}
+			<span class="badge badge-warning mb-2">Please enter a language, before using AI Assist</span>
+		{/if}
+		<input type="text" id="language" class="input input-bordered" bind:value={universe.language} />
 	</div>
 
 	<div class="form-control">
@@ -215,5 +233,7 @@
 	entityType="universe"
 	onClose={() => (showAIAssist = false)}
 	onApply={handleAIChanges}
+	currentData={universe}
+	universeId={universe._id?.toString()}
 	quickAdjustOptions={universeQuickAdjustOptions}
 />

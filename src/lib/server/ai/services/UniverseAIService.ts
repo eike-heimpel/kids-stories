@@ -72,15 +72,16 @@ export class UniverseAIService extends AIService {
                 },
                 targetAgeRange: {
                     type: 'object',
-                    description: 'Target age range for the universe',
+                    description: 'Target age range for the universe. Both min and max must be provided, and max must be greater than or equal to min.',
+                    required: ['min', 'max'],
                     properties: {
                         min: {
                             type: 'number',
-                            description: 'Minimum target age'
+                            description: 'Minimum target age. Must be a positive number.'
                         },
                         max: {
                             type: 'number',
-                            description: 'Maximum target age'
+                            description: 'Maximum target age. Must be greater than or equal to the minimum age.'
                         }
                     }
                 },
@@ -91,6 +92,10 @@ export class UniverseAIService extends AIService {
                         type: 'string',
                         description: 'A tag describing the universe'
                     }
+                },
+                language: {
+                    type: 'string',
+                    description: 'The primary language of the universe content'
                 }
             }
         };
@@ -154,11 +159,15 @@ export class UniverseAIService extends AIService {
         const universe = currentData as Universe | undefined;
 
         let formattedPrompt = `Task: ${prompt}\n\n`;
-
+        console.log(universe);
         if (universe) {
+            console.log(universe);
             formattedPrompt += `Current Universe:\n`;
             formattedPrompt += `Name: ${universe.name}\n`;
             formattedPrompt += `Description: ${universe.description}\n`;
+            if (universe.language) {
+                formattedPrompt += `Language (ONLY RESPOND IN THIS LANGUAGE): ${universe.language}\n`;
+            }
             if (universe.genre?.length) {
                 formattedPrompt += `Genres: ${universe.genre.join(', ')}\n`;
             }
