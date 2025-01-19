@@ -10,19 +10,42 @@
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		version: 1,
-		lastModifiedBy: 'placeholder-user', // Will be replaced with actual user ID
+		lastModifiedBy: '', // Will be set by the server
 		llmContext: {
 			shortDescription: ''
 		},
-		creatorId: 'placeholder-user', // Will be replaced with actual user ID
+		creatorId: '', // Will be set by the server
 		isPublic: false
 	};
 
-	// Placeholder submit function
+	let error: string | null = null;
+	let loading = false;
+
 	async function handleSubmit(universe: Universe) {
-		console.log('Creating universe:', universe);
-		// TODO: Implement actual API call
-		await goto('/private/universes');
+		loading = true;
+		error = null;
+
+		try {
+			const response = await fetch('/api/universes', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(universe)
+			});
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(errorText || 'Failed to create universe');
+			}
+
+			await goto('/private/universes');
+		} catch (e) {
+			console.error('Error creating universe:', e);
+			error = e instanceof Error ? e.message : 'Failed to create universe';
+		} finally {
+			loading = false;
+		}
 	}
 
 	function handleCancel() {
@@ -34,6 +57,12 @@
 	<div class="card bg-base-100 shadow-xl">
 		<div class="card-body">
 			<h2 class="card-title">Create New Universe</h2>
+			{#if error}
+				<div class="alert alert-error">
+					<span class="material-icons">error</span>
+					<span>{error}</span>
+				</div>
+			{/if}
 			<UniverseForm universe={newUniverse} onSubmit={handleSubmit} onCancel={handleCancel} />
 		</div>
 	</div>

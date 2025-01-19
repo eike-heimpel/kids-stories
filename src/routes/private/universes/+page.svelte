@@ -1,42 +1,38 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { Universe } from '$lib/server/mongodb/types';
 	import EntityList from '$lib/components/shared/EntityList.svelte';
 
-	// Dummy data for development
-	const dummyUniverses: Universe[] = [
-		{
-			_id: '1' as any,
-			name: 'Fantasy World',
-			description: 'A magical realm of wonder and adventure',
-			createdAt: new Date('2024-01-01'),
-			updatedAt: new Date('2024-01-01'),
-			version: 1,
-			lastModifiedBy: 'user123',
-			llmContext: {
-				shortDescription: 'A high fantasy setting with unique magic systems'
-			},
-			creatorId: 'user123',
-			isPublic: true,
-			genre: ['Fantasy', 'Adventure'],
-			tags: ['magic', 'medieval']
-		},
-		{
-			_id: '2' as any,
-			name: 'Sci-Fi Future',
-			description: 'A distant future where technology and humanity merge',
-			createdAt: new Date('2024-01-02'),
-			updatedAt: new Date('2024-01-02'),
-			version: 1,
-			lastModifiedBy: 'user123',
-			llmContext: {
-				shortDescription: 'A post-singularity science fiction universe'
-			},
-			creatorId: 'user123',
-			isPublic: true,
-			genre: ['Science Fiction', 'Cyberpunk'],
-			tags: ['future', 'technology']
+	let universes: Universe[] = [];
+	let loading = true;
+	let error: string | null = null;
+
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/universes');
+			if (!response.ok) {
+				throw new Error('Failed to load universes');
+			}
+			const data = await response.json();
+			universes = data.items;
+		} catch (e) {
+			console.error('Error loading universes:', e);
+			error = 'Failed to load universes';
+		} finally {
+			loading = false;
 		}
-	];
+	});
 </script>
 
-<EntityList items={dummyUniverses} title="Story Universes" entityType="private/universes" />
+{#if loading}
+	<div class="flex items-center justify-center p-8">
+		<span class="loading loading-spinner loading-lg"></span>
+	</div>
+{:else if error}
+	<div class="alert alert-error">
+		<span class="material-icons">error</span>
+		<span>{error}</span>
+	</div>
+{:else}
+	<EntityList items={universes} title="Story Universes" entityType="private/universes" />
+{/if}

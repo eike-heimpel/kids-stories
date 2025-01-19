@@ -41,3 +41,5 @@ The development stack includes:
         - Leave notes that will make it easier for you to understand everything in the future.
 
 You can always use your own documentation to help you make changes.
+
+This project is a story-building platform intended for use with children. It leverages an LLM-powered “AI Assist” modal to generate and adjust story content (e.g., for Universes, Characters, Plots). Content can be enriched or transformed based on user-defined prompts, “quick adjustment” toggles, or contextual references. The system must keep inter-entity references consistent (e.g., associating Characters with specific Plots or Universes) and maintain an easily extensible architecture so future enhancements (like deeper relationship-based suggestions or timeline views) can be integrated seamlessly.

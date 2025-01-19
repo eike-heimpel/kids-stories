@@ -1,6 +1,6 @@
 import type { Collection } from 'mongodb';
 import { mongodb } from './client';
-import type { User } from './types';
+import type { User, Universe } from './types';
 import { MONGO_DB_DATABASE } from '$env/static/private';
 
 if (!MONGO_DB_DATABASE) {
@@ -12,5 +12,4 @@ const db = mongodb.db(MONGO_DB_DATABASE);
 
 // Export collections
 export const users: Collection<User> = db.collection('users');
-
-// Add other collections here as needed
+export const universes: Collection<Universe> = db.collection('universes');
