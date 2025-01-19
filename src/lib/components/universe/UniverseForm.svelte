@@ -67,11 +67,29 @@
 	}
 
 	// Handle AI assist changes
-	function handleAIChanges(changes: Partial<typeof universe.llmContext>) {
-		universe.llmContext = {
-			...universe.llmContext,
-			...changes
-		};
+	function handleAIChanges(changes: Record<string, any>) {
+		// Update llmContext if present in changes
+		if (changes.llmContext) {
+			universe.llmContext = {
+				...universe.llmContext,
+				...changes.llmContext
+			};
+		}
+
+		// Update other universe fields if present
+		if (changes.name) universe.name = changes.name;
+		if (changes.description) universe.description = changes.description;
+		if (changes.genre) universe.genre = changes.genre;
+		if (changes.tags) universe.tags = changes.tags;
+		if (changes.targetAgeRange) universe.targetAgeRange = changes.targetAgeRange;
+
+		// Update inputs that are bound to local variables
+		if (changes.genre) genreInput = changes.genre.join(', ');
+		if (changes.tags) tagsInput = changes.tags.join(', ');
+		if (changes.targetAgeRange) {
+			minAge = changes.targetAgeRange.min;
+			maxAge = changes.targetAgeRange.max;
+		}
 	}
 </script>
 
@@ -194,6 +212,7 @@
 <AIAssistModal
 	bind:show={showAIAssist}
 	currentContext={universe.llmContext}
+	entityType="universe"
 	onClose={() => (showAIAssist = false)}
 	onApply={handleAIChanges}
 	quickAdjustOptions={universeQuickAdjustOptions}

@@ -1,10 +1,13 @@
 <script lang="ts">
 	import type { LLMContext } from '$lib/server/mongodb/types';
+	import { addToast } from '$lib/components/toastStore';
 
 	export let show = false;
 	export let currentContext: LLMContext;
 	export let onClose: () => void;
 	export let onApply: (changes: Partial<LLMContext>) => void;
+	export let entityType: 'universe' | 'character' | 'plot' | 'location' | 'event';
+	export let currentData: Record<string, any> | undefined = undefined;
 
 	/**
 	 * A list of "quick adjust" options passed in from the parent,
@@ -13,7 +16,7 @@
 	export let quickAdjustOptions: Array<{ id: string; label: string }> = [];
 
 	let loading = false;
-	let previewChanges: Partial<LLMContext> | null = null;
+	let previewChanges: Record<string, any> | null = null;
 	let customInstructions = '';
 	let selectedAdjustments = new Set<string>();
 
@@ -30,16 +33,32 @@
 	async function generatePreview() {
 		loading = true;
 		try {
-			// TODO: Replace with actual API call for AI-based context updates
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			previewChanges = {
-				shortDescription: 'Preview: Updated short description...',
-				longDescription: 'Preview: Updated long description...'
-				// ...Add other fields as needed
-			};
+			const response = await fetch(`/api/${entityType}s/ai-assist`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					prompt: customInstructions,
+					currentData,
+					quickAdjustments: Array.from(selectedAdjustments),
+					additionalContext: {}
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to generate preview');
+			}
+
+			const result = await response.json();
+			console.log(result);
+			previewChanges = result.updatedFields;
+
+			// Show reasoning in toast
+			addToast(result.reasoning, 'info');
 		} catch (error) {
 			console.error('Error generating preview:', error);
-			// TODO: Show error toast or handle appropriately
+			addToast('Failed to generate preview. Please try again.', 'error');
 		} finally {
 			loading = false;
 		}
@@ -84,28 +103,15 @@
 				</div>
 			{/if}
 
-			<!-- Instructions Section - Future Chat Interface -->
+			<!-- Instructions Section -->
 			<div class="form-control mb-6">
 				<label class="label" for="customInstructions">
 					<span class="label-text font-semibold">Instructions</span>
 				</label>
-				<!-- 
-					Future Chat Component will replace this textarea.
-					The chat component will need:
-					1. Message history display area
-					2. Input area for new messages
-					3. Send button
-					4. Loading states for AI responses
-					
-					The container is styled to accommodate these future elements:
-					- Fixed height with scroll
-					- Space for message bubbles
-					- Room for input area at bottom
-				-->
-				<div class="rounded-lg bg-base-200 p-4" style="min-height: 200px">
+				<div class="rounded-lg bg-base-200 p-4">
 					<textarea
 						id="customInstructions"
-						class="textarea textarea-bordered h-full w-full"
+						class="textarea textarea-bordered h-32 w-full"
 						placeholder="Add any specific instructions or context for the AI..."
 						bind:value={customInstructions}
 					/>
@@ -117,19 +123,22 @@
 				<div class="mb-6">
 					<h4 class="mb-2 font-semibold">Preview Changes</h4>
 					<div class="max-h-96 space-y-4 overflow-y-auto rounded-lg bg-base-200 p-4">
-						{#if previewChanges.shortDescription}
+						{#each Object.entries(previewChanges) as [key, value]}
 							<div>
-								<span class="text-sm font-semibold">Short Description:</span>
-								<p class="text-sm">{previewChanges.shortDescription}</p>
+								<span class="text-sm font-semibold">{key}:</span>
+								{#if Array.isArray(value)}
+									<ul class="list-inside list-disc">
+										{#each value as item}
+											<li class="text-sm">{item}</li>
+										{/each}
+									</ul>
+								{:else if typeof value === 'object'}
+									<pre class="text-sm">{JSON.stringify(value, null, 2)}</pre>
+								{:else}
+									<p class="text-sm">{value}</p>
+								{/if}
 							</div>
-						{/if}
-						{#if previewChanges.longDescription}
-							<div>
-								<span class="text-sm font-semibold">Long Description:</span>
-								<p class="text-sm">{previewChanges.longDescription}</p>
-							</div>
-						{/if}
-						<!-- Add other preview fields as needed -->
+						{/each}
 					</div>
 				</div>
 			{/if}
