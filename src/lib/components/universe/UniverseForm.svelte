@@ -1,12 +1,26 @@
 <script lang="ts">
 	import type { Universe } from '$lib/server/mongodb/types';
 	import LLMContextForm from '../shared/LLMContextForm.svelte';
+	import AIAssistModal from '../shared/AIAssistModal.svelte';
 
 	export let universe: Universe;
 	export let onSubmit: (data: Universe) => void;
 	export let onCancel: () => void;
 
 	let isSubmitting = false;
+	let showAIAssist = false;
+
+	// Quick adjust options specific to universes
+	const universeQuickAdjustOptions = [
+		{ id: 'tone-mysterious', label: '🌌 Make it more mysterious' },
+		{ id: 'tone-lighthearted', label: '☀️ Make it more lighthearted' },
+		{ id: 'complexity-simpler', label: '📚 Simplify the content' },
+		{ id: 'complexity-deeper', label: '🎯 Add more depth' },
+		{ id: 'genre-fantasy', label: '🐉 Enhance fantasy elements' },
+		{ id: 'genre-scifi', label: '🚀 Enhance sci-fi elements' },
+		{ id: 'audience-younger', label: '🎈 Adjust for younger audience' },
+		{ id: 'audience-older', label: '🎭 Adjust for older audience' }
+	];
 
 	// Initialize targetAgeRange if it doesn't exist
 	universe.targetAgeRange = universe.targetAgeRange || { min: 0, max: 0 };
@@ -51,9 +65,29 @@
 			.map((t) => t.trim())
 			.filter(Boolean);
 	}
+
+	// Handle AI assist changes
+	function handleAIChanges(changes: Partial<typeof universe.llmContext>) {
+		universe.llmContext = {
+			...universe.llmContext,
+			...changes
+		};
+	}
 </script>
 
 <form on:submit|preventDefault={handleSubmit} class="space-y-6 p-4">
+	<div class="flex justify-end">
+		<button
+			type="button"
+			class="btn btn-outline btn-primary gap-2"
+			on:click={() => (showAIAssist = true)}
+			disabled={isSubmitting}
+		>
+			<span class="text-xl">✨</span>
+			AI Assist
+		</button>
+	</div>
+
 	<div class="form-control">
 		<label class="label" for="name">
 			<span class="label-text">Universe Name</span>
@@ -156,3 +190,11 @@
 		</button>
 	</div>
 </form>
+
+<AIAssistModal
+	bind:show={showAIAssist}
+	currentContext={universe.llmContext}
+	onClose={() => (showAIAssist = false)}
+	onApply={handleAIChanges}
+	quickAdjustOptions={universeQuickAdjustOptions}
+/>
