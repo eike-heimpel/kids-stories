@@ -34,5 +34,5 @@
 		<span>{error}</span>
 	</div>
 {:else}
-	<EntityList items={universes} title="Story Universes" entityType="universes" />
+	<EntityList items={universes} title="Story Universes" entityType="universe" />
 {/if}

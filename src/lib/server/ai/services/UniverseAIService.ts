@@ -4,45 +4,6 @@ import type { Universe } from '../../mongodb/types';
 
 export class UniverseAIService extends AIService {
     protected getEntitySchema(): EntitySchema {
-        const llmContextProperties: Record<string, SchemaProperty> = {
-            shortDescription: {
-                type: 'string',
-                description: 'A brief essence of the universe for simple queries'
-            },
-            longDescription: {
-                type: 'string',
-                description: 'Detailed context for deep dives into the universe'
-            },
-            keyPoints: {
-                type: 'array',
-                description: 'Crucial bullet points about the universe',
-                items: {
-                    type: 'string',
-                    description: 'A key point about the universe'
-                }
-            },
-            relationships: {
-                type: 'string',
-                description: 'Connections to other elements in the universe'
-            },
-            hiddenInformation: {
-                type: 'string',
-                description: 'Non-obvious but important details about the universe'
-            },
-            storyImplications: {
-                type: 'string',
-                description: 'Story impact and potential of the universe'
-            },
-            tone: {
-                type: 'string',
-                description: 'Emotional/atmospheric notes about the universe'
-            },
-            systemNotes: {
-                type: 'string',
-                description: 'Special LLM instructions for the universe'
-            }
-        };
-
         return {
             type: 'object',
             description: 'A story universe with its associated context and metadata',
@@ -60,7 +21,7 @@ export class UniverseAIService extends AIService {
                     type: 'object',
                     description: 'Context information for AI processing',
                     required: ['shortDescription'],
-                    properties: llmContextProperties
+                    properties: this.getLLMContextSchema()
                 },
                 genre: {
                     type: 'array',
@@ -101,50 +62,51 @@ export class UniverseAIService extends AIService {
         };
     }
 
-    protected validateResponse(response: Record<string, any>): boolean {
-        // Validate that all fields present are of correct type
+    protected validateEntitySpecificFields(response: Record<string, any>): boolean {
         try {
-            // Validate llmContext if present
-            if (response.llmContext) {
-                if (typeof response.llmContext !== 'object') {
-                    return false;
-                }
-
-                // If shortDescription is present, it must be a string
-                if ('shortDescription' in response.llmContext &&
-                    typeof response.llmContext.shortDescription !== 'string') {
-                    return false;
-                }
-
-                // Optional fields type validation
-                if ('keyPoints' in response.llmContext &&
-                    !Array.isArray(response.llmContext.keyPoints)) {
-                    return false;
-                }
-            }
-
             // Validate arrays if present
-            if ('genre' in response && !Array.isArray(response.genre)) {
-                return false;
+            if ('genre' in response) {
+                if (!Array.isArray(response.genre)) {
+                    console.error('genre must be an array');
+                    return false;
+                }
+                if (!response.genre.every((g: unknown) => typeof g === 'string')) {
+                    console.error('All genre entries must be strings');
+                    return false;
+                }
             }
-            if ('tags' in response && !Array.isArray(response.tags)) {
-                return false;
+
+            if ('tags' in response) {
+                if (!Array.isArray(response.tags)) {
+                    console.error('tags must be an array');
+                    return false;
+                }
+                if (!response.tags.every((tag: unknown) => typeof tag === 'string')) {
+                    console.error('All tags must be strings');
+                    return false;
+                }
             }
 
             // Validate targetAgeRange if present
             if (response.targetAgeRange) {
                 const { min, max } = response.targetAgeRange;
-                if (typeof min !== 'number' || typeof max !== 'number' || min > max) {
+                if (typeof min !== 'number' || typeof max !== 'number') {
+                    console.error('Age range values must be numbers');
+                    return false;
+                }
+                if (min < 0 || max < min) {
+                    console.error('Invalid age range values');
                     return false;
                 }
             }
 
             // Validate string fields if present
-            if ('name' in response && typeof response.name !== 'string') {
-                return false;
-            }
-            if ('description' in response && typeof response.description !== 'string') {
-                return false;
+            const optionalStringFields = ['name', 'description', 'language'];
+            for (const field of optionalStringFields) {
+                if (field in response && typeof response[field] !== 'string') {
+                    console.error(`${field} must be a string if provided`);
+                    return false;
+                }
             }
 
             return true;
@@ -154,17 +116,17 @@ export class UniverseAIService extends AIService {
         }
     }
 
-    protected formatPrompt(request: AIAssistRequest): string {
-        const { prompt, currentData, quickAdjustments } = request;
+    protected formatEntitySpecificPrompt(request: AIAssistRequest): string {
+        const { prompt, currentData } = request;
         const universe = currentData as Universe | undefined;
 
         let formattedPrompt = `Task: ${prompt}\n\n`;
-        console.log(universe);
+
         if (universe) {
-            console.log(universe);
             formattedPrompt += `Current Universe:\n`;
             formattedPrompt += `Name: ${universe.name}\n`;
             formattedPrompt += `Description: ${universe.description}\n`;
+
             if (universe.language) {
                 formattedPrompt += `Language (ONLY RESPOND IN THIS LANGUAGE): ${universe.language}\n`;
             }
@@ -174,17 +136,6 @@ export class UniverseAIService extends AIService {
             if (universe.tags?.length) {
                 formattedPrompt += `Tags: ${universe.tags.join(', ')}\n`;
             }
-            formattedPrompt += `\nLLM Context:\n`;
-            formattedPrompt += `Short Description: ${universe.llmContext.shortDescription}\n`;
-            if (universe.llmContext.longDescription) {
-                formattedPrompt += `Long Description: ${universe.llmContext.longDescription}\n`;
-            }
-            // Add other LLM context fields as needed
-        }
-
-        if (quickAdjustments?.length) {
-            formattedPrompt += `\nRequested Adjustments:\n`;
-            formattedPrompt += quickAdjustments.join('\n');
         }
 
         return formattedPrompt;

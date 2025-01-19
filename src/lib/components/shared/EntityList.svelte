@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { BaseDocument } from '$lib/server/mongodb/types';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import UniverseCreateModal from '../universe/UniverseCreateModal.svelte';
 
 	interface ListItem extends BaseDocument {
@@ -11,6 +13,9 @@
 	export let title: string;
 	export let entityType: string;
 
+	// Get the current base path
+	$: basePath = $page.url.pathname;
+
 	// Placeholder search function
 	let searchQuery = '';
 	$: filteredItems = items.filter((item) =>
@@ -20,26 +25,25 @@
 	let showCreateModal = false;
 
 	function handleCreate() {
-		console.log(entityType);
 		if (entityType === 'universes') {
 			showCreateModal = true;
 		} else {
-			window.location.href = `/private/${entityType}/new`;
+			goto(`${basePath}/new`);
 		}
 	}
 
 	function handleCreateSubmit(data: { name: string; language: string }) {
 		// Navigate to the new universe page with query parameters
 		const params = new URLSearchParams({ name: data.name, language: data.language });
-		window.location.href = `/private/universes/new?${params.toString()}`;
+		goto(`${basePath}/new?${params.toString()}`);
 	}
 
 	function handleEdit(id: string) {
-		window.location.href = `/private/${entityType}/${id}/edit`;
+		goto(`${basePath}/${id}/edit`);
 	}
 
 	function handleView(id: string) {
-		window.location.href = `/private/${entityType}/${id}`;
+		goto(`${basePath}/${id}`);
 	}
 
 	// Placeholder delete function

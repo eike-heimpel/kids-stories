@@ -48,3 +48,6 @@ export interface AIServiceConfig {
     temperature?: number;
     maxTokens?: number;
 }
+
+// Re-export LLMContext for convenience
+export type { LLMContext };

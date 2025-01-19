@@ -26,12 +26,14 @@
 
 	async function handleSubmit(updatedUniverse: Universe) {
 		try {
+			const { _id, ...updateData } = updatedUniverse;
+
 			const response = await fetch(`/api/universes/${$page.params.id}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(updatedUniverse)
+				body: JSON.stringify(updateData)
 			});
 
 			if (!response.ok) {

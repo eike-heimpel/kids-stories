@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Universe } from '$lib/server/mongodb/types';
 	import LLMContextForm from '../shared/LLMContextForm.svelte';
-	import AIAssistModal from '../shared/AIAssistModal.svelte';
+	import EntityForm from '../shared/EntityForm.svelte';
 	import { page } from '$app/stores';
 
 	export let universe: Universe;
@@ -15,9 +15,6 @@
 		if (name && !universe.name) universe.name = name;
 		if (language && !universe.language) universe.language = language;
 	}
-
-	let isSubmitting = false;
-	let showAIAssist = false;
 
 	// Quick adjust options specific to universes
 	const universeQuickAdjustOptions = [
@@ -45,18 +42,6 @@
 		};
 	}
 
-	// Handle form submission
-	async function handleSubmit() {
-		isSubmitting = true;
-		try {
-			await onSubmit(universe);
-		} catch (error) {
-			console.error('Error submitting universe:', error);
-		} finally {
-			isSubmitting = false;
-		}
-	}
-
 	// Handle genre input
 	let genreInput = universe.genre?.join(', ') || '';
 	function updateGenres(input: string) {
@@ -76,58 +61,39 @@
 	}
 
 	// Handle AI assist changes
-	function handleAIChanges(changes: Record<string, any>) {
-		// Update llmContext if present in changes
-		if (changes.llmContext) {
-			universe.llmContext = {
-				...universe.llmContext,
-				...changes.llmContext
-			};
-		}
+	function handleAIChanges(event: CustomEvent<Record<string, any>>) {
+		const changes = event.detail;
 
 		// Update other universe fields if present
-		if (changes.name) universe.name = changes.name;
-		if (changes.description) universe.description = changes.description;
-		if (changes.genre) universe.genre = changes.genre;
-		if (changes.tags) universe.tags = changes.tags;
-		if (changes.targetAgeRange) universe.targetAgeRange = changes.targetAgeRange;
-
-		// Update inputs that are bound to local variables
-		if (changes.genre) genreInput = changes.genre.join(', ');
-		if (changes.tags) tagsInput = changes.tags.join(', ');
+		if (changes.genre) {
+			universe.genre = changes.genre;
+			genreInput = changes.genre.join(', ');
+		}
+		if (changes.tags) {
+			universe.tags = changes.tags;
+			tagsInput = changes.tags.join(', ');
+		}
 		if (changes.targetAgeRange) {
+			universe.targetAgeRange = changes.targetAgeRange;
 			minAge = changes.targetAgeRange.min;
 			maxAge = changes.targetAgeRange.max;
 		}
 	}
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="space-y-6 p-4">
-	<div class="flex justify-end">
-		<button
-			type="button"
-			class="btn btn-outline btn-primary gap-2"
-			on:click={() => (showAIAssist = true)}
-			disabled={isSubmitting || (!universe.name && !universe.language)}
-		>
-			AI Assist
-		</button>
-	</div>
-
-	<div class="form-control">
-		<label class="label" for="name">
-			<span class="label-text">Universe Name</span>
-		</label>
-		<input type="text" id="name" class="input input-bordered" bind:value={universe.name} required />
-	</div>
-
+<EntityForm
+	entity={universe}
+	entityType="universe"
+	{onSubmit}
+	{onCancel}
+	quickAdjustOptions={universeQuickAdjustOptions}
+	on:aichanges={handleAIChanges}
+>
 	<div class="form-control">
 		<label class="label" for="language">
 			<span class="label-text">Language</span>
 		</label>
-		{#if !universe.language}
-			<span class="badge badge-warning mb-2">Please enter a language, before using AI Assist</span>
-		{/if}
+
 		<input type="text" id="language" class="input input-bordered" bind:value={universe.language} />
 	</div>
 
@@ -194,13 +160,6 @@
 	</div>
 
 	<div class="form-control">
-		<label class="label cursor-pointer">
-			<span class="label-text">Public Universe</span>
-			<input type="checkbox" class="toggle" bind:checked={universe.isPublic} />
-		</label>
-	</div>
-
-	<div class="form-control">
 		<label class="label" for="coverImageUrl">
 			<span class="label-text">Cover Image URL</span>
 		</label>
@@ -215,25 +174,5 @@
 
 	<div class="divider">LLM Context</div>
 
-	<LLMContextForm bind:context={universe.llmContext} disabled={isSubmitting} />
-
-	<div class="flex justify-end gap-4">
-		<button type="button" class="btn btn-ghost" on:click={onCancel} disabled={isSubmitting}>
-			Cancel
-		</button>
-		<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
-			{isSubmitting ? 'Saving...' : 'Save Universe'}
-		</button>
-	</div>
-</form>
-
-<AIAssistModal
-	bind:show={showAIAssist}
-	currentContext={universe.llmContext}
-	entityType="universe"
-	onClose={() => (showAIAssist = false)}
-	onApply={handleAIChanges}
-	currentData={universe}
-	universeId={universe._id?.toString()}
-	quickAdjustOptions={universeQuickAdjustOptions}
-/>
+	<LLMContextForm bind:context={universe.llmContext} />
+</EntityForm>
