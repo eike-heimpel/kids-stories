@@ -14,7 +14,7 @@
 	export let entityType: string;
 
 	// Get the current base path
-	$: basePath = $page.url.pathname;
+	$: basePath = entityType === 'universe' ? '/private/universes' : $page.url.pathname;
 
 	// Placeholder search function
 	let searchQuery = '';
@@ -25,10 +25,12 @@
 	let showCreateModal = false;
 
 	function handleCreate() {
-		if (entityType === 'universes') {
+		if (entityType === 'universe') {
 			showCreateModal = true;
 		} else {
-			goto(`${basePath}/new`);
+			// Preserve existing URL parameters when navigating
+			const params = new URLSearchParams($page.url.searchParams);
+			goto(`${basePath}/new?${params.toString()}`);
 		}
 	}
 
@@ -109,7 +111,7 @@
 	</div>
 </div>
 
-{#if entityType === 'universes'}
+{#if entityType === 'universe'}
 	<UniverseCreateModal
 		bind:show={showCreateModal}
 		onClose={() => (showCreateModal = false)}

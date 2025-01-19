@@ -67,6 +67,67 @@
 				</section>
 			{/if}
 
+			<div class="divider">Universe Entities</div>
+
+			<section class="grid gap-4 md:grid-cols-2">
+				<div class="card bg-base-200">
+					<div class="card-body">
+						<h3 class="card-title">
+							<span class="text-2xl">👤</span>
+							Characters
+						</h3>
+						<p>Create and manage characters in this universe.</p>
+						<div class="card-actions justify-end">
+							<a href={`/private/characters/new?universeId=${universe._id}`} class="btn btn-primary"
+								>Create Character</a
+							>
+							<a href={`/private/characters?universeId=${universe._id}`} class="btn btn-ghost"
+								>View All</a
+							>
+						</div>
+					</div>
+				</div>
+
+				<div class="card bg-base-200">
+					<div class="card-body">
+						<h3 class="card-title">
+							<span class="text-2xl">🏰</span>
+							Locations
+						</h3>
+						<p>Coming soon - Create and manage locations in this universe.</p>
+						<div class="card-actions justify-end">
+							<button class="btn btn-disabled">Coming Soon</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="card bg-base-200">
+					<div class="card-body">
+						<h3 class="card-title">
+							<span class="text-2xl">📖</span>
+							Plots
+						</h3>
+						<p>Coming soon - Develop story plots and narrative arcs.</p>
+						<div class="card-actions justify-end">
+							<button class="btn btn-disabled">Coming Soon</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="card bg-base-200">
+					<div class="card-body">
+						<h3 class="card-title">
+							<span class="text-2xl">⚡</span>
+							Events
+						</h3>
+						<p>Coming soon - Track significant events in your story.</p>
+						<div class="card-actions justify-end">
+							<button class="btn btn-disabled">Coming Soon</button>
+						</div>
+					</div>
+				</div>
+			</section>
+
 			<div class="divider">LLM Context</div>
 
 			<section class="grid gap-4">

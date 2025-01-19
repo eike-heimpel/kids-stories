@@ -47,12 +47,12 @@ export interface Character extends BaseDocument {
     universeId: string;
     name: string;
     description: string;
-    llmContext: LLMContext;
-    mainCharacter: boolean;        // New field for identifying principal characters
-    status: 'alive' | 'deceased' | 'unknown';  // New status field
+    llmContext?: LLMContext;
+    mainCharacter?: boolean;        // New field for identifying principal characters
+    status?: 'alive' | 'deceased' | 'unknown';  // New status field
     tags?: string[];  // New tags field
     backstory?: string;
-    traits: string[];
+    traits?: string[];
     originLocation?: {            // New field for character origins
         locationId: string;
         description?: string;

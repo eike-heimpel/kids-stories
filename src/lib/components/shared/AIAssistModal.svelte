@@ -3,11 +3,11 @@
 	import { addToast } from '$lib/components/toastStore';
 
 	export let show = false;
-	export let currentContext: LLMContext;
+	export let currentContext: Partial<LLMContext> = {};
+	export let entityType: string;
 	export let onClose: () => void;
-	export let onApply: (changes: Partial<LLMContext>) => void;
-	export let entityType: 'universe' | 'character' | 'plot' | 'location' | 'event';
-	export let currentData: Record<string, any> | undefined = undefined;
+	export let onApply: (changes: Record<string, any>) => void;
+	export let currentData: Record<string, any> = {};
 	export let universeId: string | undefined = undefined;
 
 	/**

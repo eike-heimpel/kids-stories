@@ -1,95 +1,82 @@
 <script lang="ts">
-	const storyFeatures = [
-		{
-			title: 'Story Universes',
-			description:
-				'Create and manage your story universes, the foundation of your narrative worlds.',
-			icon: '🌍',
-			href: '/private/universes',
-			color: 'primary'
-		},
-		{
-			title: 'Characters',
-			description: 'Coming soon - Develop and track your story characters.',
-			icon: '👤',
-			href: '/private/characters',
-			color: 'secondary',
-			disabled: true
-		},
-		{
-			title: 'Locations',
-			description: 'Coming soon - Create and manage locations in your story universes.',
-			icon: '🏰',
-			href: '/private/locations',
-			color: 'accent',
-			disabled: true
-		},
-		{
-			title: 'Plots',
-			description: 'Coming soon - Develop your story plots and narrative arcs.',
-			icon: '📖',
-			href: '/private/plots',
-			color: 'info',
-			disabled: true
-		},
-		{
-			title: 'Events',
-			description: 'Coming soon - Track significant events in your stories.',
-			icon: '⚡',
-			href: '/private/events',
-			color: 'success',
-			disabled: true
-		},
-		{
-			title: 'World Rules',
-			description: 'Coming soon - Define the rules and systems of your story worlds.',
-			icon: '⚖️',
-			href: '/private/world-rules',
-			color: 'warning',
-			disabled: true
-		},
-		{
-			title: 'Story Arcs',
-			description: 'Coming soon - Plan and manage overarching story arcs.',
-			icon: '🔄',
-			href: '/private/story-arcs',
-			color: 'error',
-			disabled: true
+	import { onMount } from 'svelte';
+	import type { Universe } from '$lib/server/mongodb/types';
+	import EntityList from '$lib/components/shared/EntityList.svelte';
+	import UniverseCreateModal from '$lib/components/universe/UniverseCreateModal.svelte';
+	import { goto } from '$app/navigation';
+
+	let universes: Universe[] = [];
+	let loading = true;
+	let error: string | null = null;
+	let showCreateModal = false;
+
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/universes');
+			if (!response.ok) {
+				throw new Error('Failed to load universes');
+			}
+			const data = await response.json();
+			universes = data.items;
+		} catch (e) {
+			console.error('Error loading universes:', e);
+			error = 'Failed to load universes';
+		} finally {
+			loading = false;
 		}
-	];
+	});
+
+	function handleCreate() {
+		showCreateModal = true;
+	}
+
+	function handleCreateSubmit(data: { name: string; language: string }) {
+		const params = new URLSearchParams({ name: data.name, language: data.language });
+		goto(`/private/universes/new?${params.toString()}`);
+	}
 </script>
 
-<div class="container mx-auto p-4">
-	<h1 class="mb-8 text-3xl font-bold">Story Builder Dashboard</h1>
-
-	<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-		{#each storyFeatures as feature}
-			<div class="card bg-base-100 shadow-xl transition-shadow duration-200 hover:shadow-2xl">
-				<div class="card-body">
-					<div class="mb-4 text-4xl">{feature.icon}</div>
-					<h2 class="card-title">{feature.title}</h2>
-					<p>{feature.description}</p>
-					<div class="card-actions mt-4 justify-end">
-						<a
-							href={feature.href}
-							class="btn btn-{feature.color}"
-							class:btn-disabled={feature.disabled}
-						>
-							{feature.disabled ? 'Coming Soon' : 'Explore'}
-						</a>
-					</div>
-				</div>
-			</div>
-		{/each}
-	</div>
-
-	<div class="mt-12 rounded-box bg-base-200 p-6">
-		<h2 class="mb-4 text-2xl font-bold">Quick Start Guide</h2>
-		<div class="steps steps-vertical">
-			<div class="step step-primary">Create a new Universe to define your story world</div>
-			<div class="step">Add Characters to populate your universe</div>
-			<div class="step">Define Locations where your story takes place</div>
-			<div class="step">Create Plots and Story Arcs to bring your narrative to life</div>
+<div class="container mx-auto">
+	{#if loading}
+		<div class="flex items-center justify-center p-8">
+			<span class="loading loading-spinner loading-lg"></span>
 		</div>
-	</div>
+	{:else if error}
+		<div class="alert alert-error">
+			<span class="material-icons">error</span>
+			<span>{error}</span>
+		</div>
+	{:else}
+		<div class="p-4">
+			<div class="mb-8">
+				<h1 class="text-3xl font-bold">Story Builder Dashboard</h1>
+				<p class="mt-2 text-base-content/70">
+					Select a universe to begin, or create a new one to start your journey.
+				</p>
+			</div>
+
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="text-2xl font-bold">Your Story Universes</h2>
+				<button class="btn btn-primary" on:click={handleCreate}>Create New Universe</button>
+			</div>
+
+			<EntityList items={universes} title="Story Universes" entityType="universe" />
+		</div>
+
+		<div class="mt-12 rounded-box bg-base-200 p-6">
+			<h2 class="mb-4 text-2xl font-bold">Quick Start Guide</h2>
+			<div class="steps steps-vertical">
+				<div class="step step-primary">Create a new Universe to define your story world</div>
+				<div class="step">Add Characters to populate your universe</div>
+				<div class="step">Define Locations where your story takes place</div>
+				<div class="step">Create Plots and Story Arcs to bring your narrative to life</div>
+			</div>
+		</div>
+	{/if}
 </div>
+
+<UniverseCreateModal
+	bind:show={showCreateModal}
+	onClose={() => (showCreateModal = false)}
+	onSubmit={handleCreateSubmit}
+/>

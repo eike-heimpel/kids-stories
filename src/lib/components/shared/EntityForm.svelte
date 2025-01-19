@@ -2,16 +2,18 @@
 	import type { BaseDocument, LLMContext } from '$lib/server/mongodb/types';
 	import AIAssistModal from './AIAssistModal.svelte';
 
-	interface EntityWithTitle extends BaseDocument {
+	// Make the interface more lenient by making all fields optional
+	interface EntityWithCommon extends Partial<BaseDocument> {
 		name?: string;
 		title?: string;
 		isPublic?: boolean;
-		llmContext: LLMContext;
+		llmContext?: Partial<LLMContext>;
+		[key: string]: any; // Allow any additional fields
 	}
 
-	export let entity: EntityWithTitle;
+	export let entity: EntityWithCommon;
 	export let entityType: 'universe' | 'character' | 'plot' | 'location' | 'event';
-	export let onSubmit: (data: typeof entity) => void;
+	export let onSubmit: <T extends EntityWithCommon>(data: T) => void;
 	export let onCancel: () => void;
 	export let quickAdjustOptions: Array<{ id: string; label: string }> = [];
 
@@ -30,24 +32,49 @@
 		}
 	}
 
-	// Handle AI assist changes
-	function handleAIChanges(changes: Record<string, any>) {
-		// Update llmContext if present in changes
-		if (changes.llmContext) {
-			// Replace the entire llmContext object instead of merging
-			entity.llmContext = changes.llmContext as LLMContext;
-		}
+	// Deep merge function for objects
+	function deepMerge(target: any, source: any) {
+		if (!source) return target;
+		if (!target) return source;
 
-		// Update any other entity fields that might have changed
-		for (const [key, value] of Object.entries(changes)) {
-			if (key !== 'llmContext' && key in entity) {
-				// Only update if the key exists in the entity and matches its type
-				const entityKey = key as keyof EntityWithTitle;
-				if (typeof value === typeof entity[entityKey]) {
-					(entity[entityKey] as any) = value;
-				}
+		const result = { ...target };
+		for (const key of Object.keys(source)) {
+			if (Array.isArray(source[key])) {
+				// For arrays, replace the entire array
+				result[key] = [...source[key]];
+			} else if (source[key] instanceof Object && target[key] instanceof Object) {
+				// For nested objects, recursively merge
+				result[key] = deepMerge(target[key], source[key]);
+			} else {
+				// For primitives or when target doesn't have the key, use source value
+				result[key] = source[key];
 			}
 		}
+		return result;
+	}
+
+	// Handle AI assist changes
+	function handleAIChanges(changes: Record<string, any>) {
+		console.log('Applying changes:', changes); // Debug log
+
+		// Create a copy of the current entity
+		let updatedEntity = { ...entity };
+
+		// Update each changed field
+		for (const [key, value] of Object.entries(changes)) {
+			if (value instanceof Object && !Array.isArray(value)) {
+				// For objects (like llmContext), do a deep merge
+				updatedEntity[key] = deepMerge(entity[key] || {}, value);
+			} else {
+				// For arrays and primitive values, replace directly
+				updatedEntity[key] = value;
+			}
+		}
+
+		console.log('Updated entity:', updatedEntity); // Debug log
+
+		// Update the entity with all changes at once
+		Object.assign(entity, updatedEntity);
 
 		// Emit the changes for entity-specific handling
 		dispatchEvent(new CustomEvent('aichanges', { detail: changes }));
@@ -74,7 +101,7 @@
 		<label class="label" for="name">
 			<span class="label-text">{entityType} Name</span>
 		</label>
-		<input type="text" id="name" class="input input-bordered" bind:value={entity.name} required />
+		<input type="text" id="name" class="input input-bordered" bind:value={entity.name} />
 	</div>
 
 	<!-- Slot for entity-specific fields -->
