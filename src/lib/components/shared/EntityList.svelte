@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import UniverseCreateModal from '../universe/UniverseCreateModal.svelte';
 	import type { Universe } from '$lib/server/mongodb/types';
+	import { addToast } from '$lib/components/toastStore';
 
 	interface ListItem extends BaseDocument {
 		name?: string;
@@ -25,6 +26,8 @@
 	);
 
 	let showCreateModal = false;
+	let showDeleteModal = false;
+	let itemToDelete: ListItem | null = null;
 
 	function handleCreate() {
 		if (entityType === 'universe') {
@@ -50,10 +53,33 @@
 		goto(`${basePath}/${id}`);
 	}
 
-	// Placeholder delete function
-	function handleDelete(id: string) {
-		console.log('Delete:', id);
-		// Will be implemented with actual API call later
+	function confirmDelete(item: ListItem) {
+		itemToDelete = item;
+		showDeleteModal = true;
+	}
+
+	async function handleDelete() {
+		if (!itemToDelete?._id) return;
+
+		try {
+			const response = await fetch(`/api/${entityType}s/${itemToDelete._id}`, {
+				method: 'DELETE'
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to delete item');
+			}
+
+			// Remove the item from the local list
+			items = items.filter((item) => item._id !== itemToDelete._id);
+			addToast('Item deleted successfully', 'success');
+		} catch (error) {
+			console.error('Error deleting item:', error);
+			addToast('Failed to delete item', 'error');
+		} finally {
+			showDeleteModal = false;
+			itemToDelete = null;
+		}
 	}
 </script>
 
@@ -101,10 +127,7 @@
 							>
 								Edit
 							</button>
-							<button
-								class="btn btn-outline btn-error btn-sm"
-								on:click={() => handleDelete(item._id?.toString() || '')}
-							>
+							<button class="btn btn-outline btn-error btn-sm" on:click={() => confirmDelete(item)}>
 								Delete
 							</button>
 						</td>
@@ -121,4 +144,21 @@
 		onClose={() => (showCreateModal = false)}
 		onSubmit={handleCreateSubmit}
 	/>
+{/if}
+
+{#if showDeleteModal}
+	<div class="modal modal-open">
+		<div class="modal-box">
+			<h3 class="text-lg font-bold">Confirm Delete</h3>
+			<p class="py-4">
+				Are you sure you want to delete "{itemToDelete?.name ||
+					itemToDelete?.title ||
+					'this item'}"? This action cannot be undone.
+			</p>
+			<div class="modal-action">
+				<button class="btn btn-ghost" on:click={() => (showDeleteModal = false)}>Cancel</button>
+				<button class="btn btn-error" on:click={handleDelete}>Delete</button>
+			</div>
+		</div>
+	</div>
 {/if}
