@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { goto, invalidate } from '$app/navigation';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import { addToast } from '$lib/components/toastStore';
 	import type { BaseDocument } from '$lib/server/mongodb/types';
+	import type { ObjectId } from 'mongodb';
 
-	interface EntityInfo extends Partial<BaseDocument> {
-		_id?: string;
-		name: string;
+	// Base interface for any entity
+	interface EntityInfo {
+		_id?: string | ObjectId;
+		name?: string;
 		[key: string]: any;
 	}
 
@@ -19,6 +21,7 @@
 	export let parent: ParentInfo | null = null; // For nested entities like characters in a universe
 	export let basePath: string; // The base API path for this entity type
 	export let returnPath: string; // Where to return on cancel/after save
+	export let layoutBasePath: string = basePath; // The base path for the layout (for invalidation)
 
 	const isEdit = !!entity._id;
 
@@ -44,9 +47,10 @@
 			// Show success message
 			addToast(`${entityType} ${isEdit ? 'updated' : 'created'} successfully`, 'success');
 
-			// Invalidate the parent route if there is one
+			// Invalidate both the parent route and the layout data
 			if (parent) {
-				await invalidate(returnPath);
+				invalidateAll();
+				await Promise.all([invalidate(returnPath), invalidate(layoutBasePath)]);
 			}
 
 			// Navigate to the entity detail view
@@ -73,7 +77,7 @@
 			{#if parent}
 				<p class="opacity-60">
 					{#if isEdit}
-						Editing {entity.name} in {parent.name}
+						Editing {entity.name || ''} in {parent.name}
 					{:else}
 						Add a new {entityType} to {parent.name}
 					{/if}
