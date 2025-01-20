@@ -4,6 +4,10 @@
 	let { supabase, session } = $derived(data);
 
 	async function handleLogout() {
+		if (!supabase) {
+			console.error('Supabase client not initialized');
+			return;
+		}
 		const { error } = await supabase.auth.signOut();
 		if (error) {
 			console.error('Error logging out:', error.message);
@@ -59,37 +63,59 @@
 		</div>
 
 		<!-- Page content -->
-		<main class="flex-1 p-4">
+		<main class="flex-1 p-6 lg:px-8">
 			{@render children()}
 		</main>
 	</div>
 
 	<!-- Side navigation -->
-	<div class="drawer-side">
+	<div class="drawer-side z-40">
 		<label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class="min-h-full w-80 bg-base-200 p-4 text-base-content">
+		<div class="min-h-full w-64 bg-base-200 px-3 py-4 text-base-content">
 			<!-- User profile -->
-			<div class="mb-6 flex items-center gap-4 rounded-lg bg-base-100 p-4">
+			<div class="mb-4 flex items-center gap-3 rounded-lg bg-base-100 p-3">
 				<div class="avatar placeholder">
-					<div class="w-12 rounded-full bg-neutral text-neutral-content">
-						<span class="text-xl">{session?.user?.email?.charAt(0).toUpperCase()}</span>
+					<div class="w-10 rounded-full bg-neutral text-neutral-content">
+						<span class="text-lg">{session?.user?.email?.charAt(0).toUpperCase()}</span>
 					</div>
 				</div>
 				<div class="flex-1 truncate">
-					<div class="font-medium">{session?.user?.email}</div>
+					<div class="text-sm font-medium">{session?.user?.email}</div>
 				</div>
 			</div>
 
 			<!-- Navigation -->
-			<ul class="menu rounded-box">
+			<ul class="menu gap-2">
 				<li>
-					<button on:click={() => goto('/private')} class="btn btn-primary"> Dashboard </button>
-				</li>
-				<li class="mt-2">
-					<button on:click={() => goto('/private/purchase')} class="btn">
+					<button
+						on:click={() => goto('/private')}
+						class="btn btn-primary btn-sm w-full justify-start"
+					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
-							class="h-5 w-5"
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+							/>
+						</svg>
+						Dashboard
+					</button>
+				</li>
+				<li>
+					<button
+						on:click={() => goto('/private/purchase')}
+						class="btn btn-ghost btn-sm w-full justify-start"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -107,11 +133,11 @@
 			</ul>
 
 			<!-- Logout button -->
-			<div class="mt-auto pt-6">
-				<button class="btn btn-outline btn-block" on:click={handleLogout}>
+			<div class="fixed bottom-4 mt-auto w-[224px]">
+				<button class="btn btn-outline btn-sm w-full" on:click={handleLogout}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
-						class="mr-2 h-5 w-5"
+						class="mr-2 h-4 w-4"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"

@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import UniverseCreateModal from '../universe/UniverseCreateModal.svelte';
+	import type { Universe } from '$lib/server/mongodb/types';
 
 	interface ListItem extends BaseDocument {
 		name?: string;
@@ -11,7 +12,8 @@
 
 	export let items: ListItem[] = [];
 	export let title: string;
-	export let entityType: string;
+	export let entityType: 'universe' | 'character' = 'universe';
+	export let showCreateButton = true;
 
 	// Get the current base path
 	$: basePath = entityType === 'universe' ? '/private/universes' : $page.url.pathname;
@@ -58,7 +60,9 @@
 <div class="p-4">
 	<div class="mb-4 flex items-center justify-between">
 		<h1 class="text-2xl font-bold">{title}</h1>
-		<button class="btn btn-primary" on:click={handleCreate}> Create New </button>
+		{#if showCreateButton}
+			<button class="btn btn-primary" on:click={handleCreate}> Create New </button>
+		{/if}
 	</div>
 
 	<div class="form-control mb-4 w-full max-w-xs">
@@ -86,19 +90,19 @@
 						<td>{new Date(item.createdAt).toLocaleDateString()}</td>
 						<td class="flex gap-2">
 							<button
-								class="btn btn-ghost btn-sm"
+								class="btn btn-outline btn-sm"
 								on:click={() => handleView(item._id?.toString() || '')}
 							>
 								View
 							</button>
 							<button
-								class="btn btn-ghost btn-sm"
+								class="btn btn-primary btn-sm"
 								on:click={() => handleEdit(item._id?.toString() || '')}
 							>
 								Edit
 							</button>
 							<button
-								class="btn btn-error btn-sm"
+								class="btn btn-outline btn-error btn-sm"
 								on:click={() => handleDelete(item._id?.toString() || '')}
 							>
 								Delete
