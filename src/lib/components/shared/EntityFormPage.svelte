@@ -1,0 +1,86 @@
+<script lang="ts">
+	import { goto, invalidate } from '$app/navigation';
+	import { addToast } from '$lib/components/toastStore';
+	import type { BaseDocument } from '$lib/server/mongodb/types';
+
+	interface EntityInfo extends Partial<BaseDocument> {
+		_id?: string;
+		name: string;
+		[key: string]: any;
+	}
+
+	interface ParentInfo {
+		_id: string;
+		name: string;
+	}
+
+	export let entity: EntityInfo;
+	export let entityType: 'universe' | 'character' | 'plot' | 'location' | 'event';
+	export let parent: ParentInfo | null = null; // For nested entities like characters in a universe
+	export let basePath: string; // The base API path for this entity type
+	export let returnPath: string; // Where to return on cancel/after save
+
+	const isEdit = !!entity._id;
+
+	async function handleSubmit(entityData: EntityInfo) {
+		try {
+			const endpoint = isEdit ? `${basePath}/${entity._id}` : basePath;
+
+			const response = await fetch(endpoint, {
+				method: isEdit ? 'PUT' : 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(entityData)
+			});
+
+			if (!response.ok) {
+				throw new Error(await response.text());
+			}
+
+			const savedEntity = await response.json();
+			const entityId = savedEntity._id?.toString() || savedEntity._id;
+
+			// Show success message
+			addToast(`${entityType} ${isEdit ? 'updated' : 'created'} successfully`, 'success');
+
+			// Invalidate the parent route if there is one
+			if (parent) {
+				await invalidate(returnPath);
+			}
+
+			// Navigate to the entity detail view
+			await goto(`${basePath}/${entityId}`);
+		} catch (e) {
+			console.error(`Error ${isEdit ? 'updating' : 'creating'} ${entityType}:`, e);
+			addToast(
+				e instanceof Error ? e.message : `Failed to ${isEdit ? 'update' : 'create'} ${entityType}`,
+				'error'
+			);
+		}
+	}
+
+	function handleCancel() {
+		const path = isEdit ? `${basePath}/${entity._id}` : returnPath;
+		goto(path);
+	}
+</script>
+
+<div class="container mx-auto max-w-4xl p-4">
+	<div class="card bg-base-100 shadow-xl">
+		<div class="card-body">
+			<h2 class="card-title text-3xl">{isEdit ? 'Edit' : 'Create New'} {entityType}</h2>
+			{#if parent}
+				<p class="opacity-60">
+					{#if isEdit}
+						Editing {entity.name} in {parent.name}
+					{:else}
+						Add a new {entityType} to {parent.name}
+					{/if}
+				</p>
+			{/if}
+
+			<slot {handleSubmit} {handleCancel} />
+		</div>
+	</div>
+</div>

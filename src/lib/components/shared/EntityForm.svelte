@@ -83,7 +83,7 @@
 
 <form on:submit|preventDefault={handleSubmit} class="space-y-6 p-4">
 	<div class="flex justify-end gap-4">
-		<button type="button" class="btn btn-primary" on:click={handleSubmit} disabled={isSubmitting}>
+		<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
 			Save {entityType}
 		</button>
 		<button

@@ -78,10 +78,10 @@
 						</h3>
 						<p>Create and manage characters in this universe.</p>
 						<div class="card-actions justify-end">
-							<a href={`/private/characters/new?universeId=${universe._id}`} class="btn btn-primary"
+							<a href={`/private/universes/${universe._id}/characters/new`} class="btn btn-primary"
 								>Create Character</a
 							>
-							<a href={`/private/characters?universeId=${universe._id}`} class="btn btn-ghost"
+							<a href={`/private/universes/${universe._id}/characters`} class="btn btn-ghost"
 								>View All</a
 							>
 						</div>

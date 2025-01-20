@@ -2,6 +2,7 @@
 	import type { BaseDocument } from '$lib/server/mongodb/types';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { invalidate } from '$app/navigation';
 	import UniverseCreateModal from '../universe/UniverseCreateModal.svelte';
 	import type { Universe } from '$lib/server/mongodb/types';
 	import { addToast } from '$lib/components/toastStore';
@@ -18,6 +19,9 @@
 
 	// Get the current base path
 	$: basePath = entityType === 'universe' ? '/private/universes' : $page.url.pathname;
+
+	// Get the API base path
+	$: apiPath = entityType === 'universe' ? '/api/universes' : $page.url.pathname;
 
 	// Placeholder search function
 	let searchQuery = '';
@@ -60,9 +64,10 @@
 
 	async function handleDelete() {
 		if (!itemToDelete?._id) return;
+		const id = itemToDelete._id;
 
 		try {
-			const response = await fetch(`/api/${entityType}s/${itemToDelete._id}`, {
+			const response = await fetch(`${apiPath}/${id}`, {
 				method: 'DELETE'
 			});
 
@@ -70,9 +75,12 @@
 				throw new Error('Failed to delete item');
 			}
 
-			// Remove the item from the local list
-			items = items.filter((item) => item._id !== itemToDelete._id);
+			// Show success message and update local state
 			addToast('Item deleted successfully', 'success');
+			items = items.filter((item) => item._id !== id);
+
+			// Trigger data refresh in the background
+			invalidate(apiPath);
 		} catch (error) {
 			console.error('Error deleting item:', error);
 			addToast('Failed to delete item', 'error');

@@ -3,8 +3,8 @@
 	import EntityForm from '../shared/EntityForm.svelte';
 	import { page } from '$app/stores';
 
-	export let character: Character;
-	export let onSubmit: (data: Character) => void;
+	export let character: Partial<Character>;
+	export let onSubmit: (data: Partial<Character>) => void;
 	export let onCancel: () => void;
 
 	// Quick adjust options for AI assist
@@ -118,7 +118,13 @@
 				type="text"
 				id="abilities"
 				class="input input-bordered"
-				bind:value={character.abilities}
+				value={character.abilities?.join(', ') || ''}
+				on:input={(e) => {
+					character.abilities = e.currentTarget.value
+						.split(',')
+						.map((t) => t.trim())
+						.filter(Boolean);
+				}}
 				placeholder="magic, swordsmanship, healing"
 			/>
 		</div>
@@ -132,7 +138,13 @@
 				type="text"
 				id="tags"
 				class="input input-bordered"
-				bind:value={character.tags}
+				value={character.tags?.join(', ') || ''}
+				on:input={(e) => {
+					character.tags = e.currentTarget.value
+						.split(',')
+						.map((t) => t.trim())
+						.filter(Boolean);
+				}}
 				placeholder="hero, mentor, antagonist"
 			/>
 		</div>

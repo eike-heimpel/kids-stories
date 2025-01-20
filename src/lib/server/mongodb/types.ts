@@ -45,6 +45,7 @@ export interface Universe extends BaseDocument {
 
 export interface Character extends BaseDocument {
     universeId: string;
+    creatorId: string;
     name: string;
     description: string;
     llmContext?: LLMContext;
