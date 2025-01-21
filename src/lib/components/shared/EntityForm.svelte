@@ -1,26 +1,78 @@
 <script lang="ts">
-	import type { EntityWithCommon } from '$lib/types/forms';
+	import type { EntityWithCommon, EntityFormProps, ValidationError } from '$lib/types/forms';
+	import type { Readable } from 'svelte/store';
 	import AIAssistModal from './AIAssistModal.svelte';
+	import { addToast } from '$lib/components/toastStore';
 
-	export let entity: EntityWithCommon;
-	export let entityType: 'universe' | 'character' | 'plot' | 'location' | 'event';
-	export let onSubmit: <T extends EntityWithCommon>(data: T) => void;
-	export let onCancel: () => void;
-	export let quickAdjustOptions: Array<{ id: string; label: string }> = [];
+	type T = EntityWithCommon;
+	type ValidationState = {
+		errors: ValidationError[];
+		isValid: boolean;
+		getFieldError: (path: string) => string | undefined;
+	};
+	type ValidationStore = {
+		subscribe: Readable<ValidationState>['subscribe'];
+		validate: (data: any) => boolean;
+	};
+
+	export let entity: T;
+	export let entityType: EntityFormProps<T>['entityType'];
+	export let onSubmit: EntityFormProps<T>['onSubmit'];
+	export let onCancel: EntityFormProps<T>['onCancel'];
+	export let validation: ValidationStore | undefined = undefined;
 
 	let isSubmitting = false;
 	let showAIAssist = false;
 
 	// Handle form submission
 	async function handleSubmit() {
+		// Run validation if available
+		if (validation && $validation) {
+			console.log('Submitting entity:', entity);
+			const isValid = validation.validate(entity);
+			console.log('Validation result:', isValid);
+			console.log('Validation state:', $validation);
+
+			if (!isValid) {
+				// Show validation errors
+				const errors = ($validation as ValidationState).errors;
+				if (errors.length > 0) {
+					console.log('Validation errors:', errors);
+					addToast(errors[0].message, 'error');
+				}
+				return;
+			}
+		}
+
 		isSubmitting = true;
 		try {
 			await onSubmit(entity);
 		} catch (error) {
 			console.error(`Error submitting ${entityType}:`, error);
+			addToast(`Failed to save ${entityType}`, 'error');
 		} finally {
 			isSubmitting = false;
 		}
+	}
+
+	// Handle AI assist changes
+	function handleAIChanges(changes: Record<string, any>) {
+		// Create a copy of the current entity
+		let updatedEntity = { ...entity };
+
+		// Update each changed field
+		for (const [key, value] of Object.entries(changes)) {
+			if (value instanceof Object && !Array.isArray(value)) {
+				// For objects (like llmContext), do a deep merge
+				updatedEntity[key] = deepMerge(entity[key] || {}, value);
+			} else {
+				// For arrays and primitive values, replace directly
+				updatedEntity[key] = value;
+			}
+		}
+
+		// Update the entity with all changes at once
+		Object.assign(entity, updatedEntity);
 	}
 
 	// Deep merge function for objects
@@ -43,39 +95,12 @@
 		}
 		return result;
 	}
-
-	// Handle AI assist changes
-	function handleAIChanges(changes: Record<string, any>) {
-		console.log('Applying changes:', changes); // Debug log
-
-		// Create a copy of the current entity
-		let updatedEntity = { ...entity };
-
-		// Update each changed field
-		for (const [key, value] of Object.entries(changes)) {
-			if (value instanceof Object && !Array.isArray(value)) {
-				// For objects (like llmContext), do a deep merge
-				updatedEntity[key] = deepMerge(entity[key] || {}, value);
-			} else {
-				// For arrays and primitive values, replace directly
-				updatedEntity[key] = value;
-			}
-		}
-
-		console.log('Updated entity:', updatedEntity); // Debug log
-
-		// Update the entity with all changes at once
-		Object.assign(entity, updatedEntity);
-
-		// Emit the changes for entity-specific handling
-		dispatchEvent(new CustomEvent('aichanges', { detail: changes }));
-	}
 </script>
 
 <form on:submit|preventDefault={handleSubmit} class="space-y-6 p-4">
 	<div class="flex justify-end gap-4">
 		<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
-			Save {entityType}
+			{isSubmitting ? 'Saving...' : `Save ${entityType}`}
 		</button>
 		<button
 			type="button"
@@ -90,9 +115,20 @@
 	<!-- Common Fields -->
 	<div class="form-control">
 		<label class="label" for="name">
-			<span class="label-text">{entityType} Name</span>
+			<span class="label-text">{entityType} Name <span class="text-error">*</span></span>
 		</label>
-		<input type="text" id="name" class="input input-bordered" bind:value={entity.name} />
+		<input
+			type="text"
+			id="name"
+			class="input input-bordered"
+			class:input-error={$validation?.getFieldError('name')}
+			bind:value={entity.name}
+		/>
+		{#if $validation?.getFieldError('name')}
+			<label class="label">
+				<span class="label-text-alt text-error">{$validation.getFieldError('name')}</span>
+			</label>
+		{/if}
 	</div>
 
 	<!-- Slot for entity-specific fields -->
@@ -126,5 +162,4 @@
 	onApply={handleAIChanges}
 	currentData={entity}
 	universeId={entity._id?.toString()}
-	{quickAdjustOptions}
 />

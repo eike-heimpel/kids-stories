@@ -1,13 +1,25 @@
 <script lang="ts">
-	import type { Universe } from '$lib/server/mongodb/types';
-	import type { EntityWithCommon } from '$lib/types/forms';
+	import {
+		universeFormSchema,
+		universeSchema,
+		type Universe,
+		type UniverseForm
+	} from '$lib/schemas/universe';
+	import { createFormValidation } from '$lib/stores/formValidation';
 	import LLMContextForm from '../shared/LLMContextForm.svelte';
 	import EntityForm from '../shared/EntityForm.svelte';
+	import FormField from '../shared/FormField.svelte';
+	import ArrayField from '../shared/ArrayField.svelte';
+	import ObjectField from '../shared/ObjectField.svelte';
 	import { page } from '$app/stores';
+	import { addToast } from '$lib/components/toastStore';
+	import type { EntityWithCommon } from '$lib/types/forms';
 
 	export let universe: Universe;
-	export let onSubmit: <T extends EntityWithCommon>(data: T) => void;
+	export let onSubmit: (data: Universe) => Promise<void>;
 	export let onCancel: () => void;
+
+	const validation = createFormValidation(universeFormSchema);
 
 	// Get query parameters if they exist
 	$: if ($page?.url?.searchParams) {
@@ -17,161 +29,119 @@
 		if (language && !universe.language) universe.language = language;
 	}
 
-	// Quick adjust options specific to universes
-	const universeQuickAdjustOptions = [
-		{ id: 'tone-mysterious', label: '🌌 Make it more mysterious' },
-		{ id: 'tone-lighthearted', label: '☀️ Make it more lighthearted' },
-		{ id: 'complexity-simpler', label: '📚 Simplify the content' },
-		{ id: 'complexity-deeper', label: '🎯 Add more depth' },
-		{ id: 'genre-fantasy', label: '🐉 Enhance fantasy elements' },
-		{ id: 'genre-scifi', label: '🚀 Enhance sci-fi elements' },
-		{ id: 'audience-younger', label: '🎈 Adjust for younger audience' },
-		{ id: 'audience-older', label: '🎭 Adjust for older audience' }
-	];
-
-	// Initialize targetAgeRange if it doesn't exist
+	// Initialize fields with defaults from schema
 	universe.targetAgeRange = universe.targetAgeRange || { min: 0, max: 0 };
+	universe.genre = universe.genre || [];
+	universe.tags = universe.tags || [];
+	// Ensure llmContext exists with required fields
+	universe.llmContext = {
+		...(universe.llmContext || {}),
+		shortDescription: universe.llmContext?.shortDescription || ''
+	};
 
-	// Local variables for age range
-	let minAge = universe.targetAgeRange.min;
-	let maxAge = universe.targetAgeRange.max;
-
-	$: {
-		universe.targetAgeRange = {
-			min: minAge,
-			max: maxAge
-		};
-	}
-
-	// Handle genre input
-	let genreInput = universe.genre?.join(', ') || '';
-	function updateGenres(input: string) {
-		universe.genre = input
-			.split(',')
-			.map((g) => g.trim())
-			.filter(Boolean);
-	}
-
-	// Handle tags input
-	let tagsInput = universe.tags?.join(', ') || '';
-	function updateTags(input: string) {
-		universe.tags = input
-			.split(',')
-			.map((t) => t.trim())
-			.filter(Boolean);
-	}
+	// Handle form submission wrapper
+	const handleSubmit = async (data: Universe) => {
+		try {
+			await onSubmit(data);
+			addToast('Universe saved successfully', 'success');
+		} catch (error) {
+			console.error('Error saving universe:', error);
+			addToast('Failed to save universe', 'error');
+			throw error;
+		}
+	};
 
 	// Handle AI assist changes
 	function handleAIChanges(event: CustomEvent<Record<string, any>>) {
 		const changes = event.detail;
-
-		// Update other universe fields if present
-		if (changes.genre) {
-			universe.genre = changes.genre;
-			genreInput = changes.genre.join(', ');
+		if (changes.genre) universe.genre = changes.genre || [];
+		if (changes.tags) universe.tags = changes.tags || [];
+		if (changes.targetAgeRange) universe.targetAgeRange = changes.targetAgeRange;
+		if (changes.llmContext) {
+			universe.llmContext = {
+				...(universe.llmContext || {}),
+				...changes.llmContext,
+				shortDescription:
+					changes.llmContext.shortDescription || universe.llmContext.shortDescription || ''
+			};
 		}
-		if (changes.tags) {
-			universe.tags = changes.tags;
-			tagsInput = changes.tags.join(', ');
-		}
-		if (changes.targetAgeRange) {
-			universe.targetAgeRange = changes.targetAgeRange;
-			minAge = changes.targetAgeRange.min;
-			maxAge = changes.targetAgeRange.max;
-		}
+		validation.validate(universe);
 	}
 </script>
 
 <EntityForm
 	entity={universe}
 	entityType="universe"
-	{onSubmit}
+	onSubmit={async (data: any) => {
+		try {
+			await onSubmit(data);
+			addToast('Universe saved successfully', 'success');
+		} catch (error) {
+			console.error('Error saving universe:', error);
+			addToast('Failed to save universe', 'error');
+			throw error;
+		}
+	}}
 	{onCancel}
-	quickAdjustOptions={universeQuickAdjustOptions}
+	{validation}
 	on:aichanges={handleAIChanges}
 >
-	<div class="form-control">
-		<label class="label" for="language">
-			<span class="label-text">Language</span>
-		</label>
+	<FormField
+		schema={universeSchema}
+		path="language"
+		label="Language"
+		bind:value={universe.language}
+		validation={$validation}
+	/>
 
-		<input type="text" id="language" class="input input-bordered" bind:value={universe.language} />
-	</div>
+	<FormField
+		schema={universeSchema}
+		path="description"
+		label="Description"
+		type="textarea"
+		bind:value={universe.description}
+		validation={$validation}
+	/>
 
-	<div class="form-control">
-		<label class="label" for="description">
-			<span class="label-text">Description</span>
-		</label>
-		<textarea
-			id="description"
-			class="textarea textarea-bordered"
-			bind:value={universe.description}
-			required
-		/>
-	</div>
+	<ArrayField
+		schema={universeSchema}
+		path="genre"
+		label="Genres"
+		bind:value={universe.genre}
+		validation={$validation}
+		placeholder="Fantasy, Science Fiction, etc. (comma-separated)"
+	/>
 
-	<div class="form-control">
-		<label class="label" for="genre">
-			<span class="label-text">Genres</span>
-		</label>
-		<input
-			type="text"
-			id="genre"
-			class="input input-bordered"
-			bind:value={genreInput}
-			on:input={(e) => updateGenres(e.currentTarget.value)}
-			placeholder="Fantasy, Science Fiction, etc. (comma-separated)"
-		/>
-	</div>
+	<ArrayField
+		schema={universeSchema}
+		path="tags"
+		label="Tags"
+		bind:value={universe.tags}
+		validation={$validation}
+		placeholder="magic, technology, etc. (comma-separated)"
+	/>
 
-	<div class="form-control">
-		<label class="label" for="tags">
-			<span class="label-text">Tags</span>
-		</label>
-		<input
-			type="text"
-			id="tags"
-			class="input input-bordered"
-			bind:value={tagsInput}
-			on:input={(e) => updateTags(e.currentTarget.value)}
-			placeholder="magic, technology, etc. (comma-separated)"
-		/>
-	</div>
+	<ObjectField
+		schema={universeSchema}
+		path="targetAgeRange"
+		label="Target Age Range"
+		bind:value={universe.targetAgeRange}
+		validation={$validation}
+		fields={[
+			{ key: 'min', label: 'Min', type: 'number', placeholder: 'Min' },
+			{ key: 'max', label: 'Max', type: 'number', placeholder: 'Max' }
+		]}
+	/>
 
-	<div class="form-control">
-		<label class="label" for="targetAgeRange">
-			<span class="label-text">Target Age Range</span>
-		</label>
-		<div class="flex gap-4">
-			<input
-				type="number"
-				class="input input-bordered w-24"
-				bind:value={minAge}
-				placeholder="Min"
-				min="0"
-			/>
-			<input
-				type="number"
-				class="input input-bordered w-24"
-				bind:value={maxAge}
-				placeholder="Max"
-				min="0"
-			/>
-		</div>
-	</div>
-
-	<div class="form-control">
-		<label class="label" for="coverImageUrl">
-			<span class="label-text">Cover Image URL</span>
-		</label>
-		<input
-			type="url"
-			id="coverImageUrl"
-			class="input input-bordered"
-			bind:value={universe.coverImageUrl}
-			placeholder="https://..."
-		/>
-	</div>
+	<FormField
+		schema={universeSchema}
+		path="coverImageUrl"
+		label="Cover Image URL"
+		type="url"
+		bind:value={universe.coverImageUrl}
+		placeholder="https://..."
+		validation={$validation}
+	/>
 
 	<div class="divider">LLM Context</div>
 

@@ -40,7 +40,7 @@ export interface Universe extends BaseDocument {
         min: number;
         max: number;
     };
-    language?: string;
+    language: string;
 }
 
 export interface Character extends BaseDocument {

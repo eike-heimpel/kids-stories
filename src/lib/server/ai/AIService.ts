@@ -187,7 +187,7 @@ export abstract class AIService {
     }
 
     protected formatPrompt(request: AIAssistRequest): string {
-        const { prompt, currentData, quickAdjustments, additionalContext } = request;
+        const { prompt, currentData, additionalContext } = request;
         let formattedPrompt = '';
 
         // Add LLM context if available
@@ -197,12 +197,6 @@ export abstract class AIService {
 
         // Add entity-specific formatting
         formattedPrompt += this.formatEntitySpecificPrompt(request);
-
-        // Add quick adjustments and additional context
-        if (quickAdjustments?.length) {
-            formattedPrompt += `\nRequested Adjustments:\n`;
-            formattedPrompt += quickAdjustments.join('\n');
-        }
 
         if (additionalContext) {
             formattedPrompt += `\nAdditional Context:\n${JSON.stringify(additionalContext)}\n`;
@@ -232,7 +226,6 @@ export abstract class AIService {
                 }
             }
         };
-        console.log(this.formatPrompt(request));
 
         // Get language from current data if it exists
         const language = (request.currentData as any)?.language;
@@ -296,7 +289,6 @@ export abstract class AIService {
                     content: `Generate content for these fields: ${JSON.stringify(fieldsToUpdate)}
                     Original prompt: ${request.prompt}
                     Current data: ${JSON.stringify(request.currentData)}
-                    Quick adjustments: ${JSON.stringify(request.quickAdjustments)}
                     Additional context: ${JSON.stringify(request.additionalContext)}`
                 }
             ],
@@ -314,7 +306,7 @@ export abstract class AIService {
         }
 
         const generatedContent = JSON.parse(functionCall.arguments);
-        console.log('Generated content:', generatedContent);
+
         if (!this.validateResponse(generatedContent)) {
             throw new Error('Generated content failed validation');
         }

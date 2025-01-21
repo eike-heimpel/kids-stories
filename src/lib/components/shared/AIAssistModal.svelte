@@ -14,7 +14,6 @@
 	 * A list of "quick adjust" options passed in from the parent,
 	 * allowing different sets based on entity type (universe, character, etc.).
 	 */
-	export let quickAdjustOptions: Array<{ id: string; label: string }> = [];
 
 	let loading = false;
 	let previewChanges: Record<string, any> | null = null;
@@ -42,7 +41,6 @@
 				body: JSON.stringify({
 					prompt: customInstructions,
 					currentData,
-					quickAdjustments: Array.from(selectedAdjustments),
 					additionalContext: {},
 					universeId
 				})
@@ -53,7 +51,7 @@
 			}
 
 			const result = await response.json();
-			console.log(result);
+
 			previewChanges = result.updatedFields;
 
 			// Show reasoning in toast
@@ -85,25 +83,6 @@
 	<div class="modal modal-open">
 		<div class="modal-box max-w-3xl">
 			<h3 class="mb-4 text-lg font-bold">AI Assist</h3>
-
-			<!-- Quick Adjust Section -->
-			{#if quickAdjustOptions.length > 0}
-				<div class="mb-6">
-					<h4 class="mb-2 font-semibold">Quick Adjustments</h4>
-					<div class="grid grid-cols-2 gap-2">
-						{#each quickAdjustOptions as option}
-							<button
-								class="btn btn-outline btn-sm justify-start {selectedAdjustments.has(option.id)
-									? 'btn-primary'
-									: ''}"
-								on:click={() => toggleAdjustment(option.id)}
-							>
-								{option.label}
-							</button>
-						{/each}
-					</div>
-				</div>
-			{/if}
 
 			<!-- Instructions Section -->
 			<div class="form-control mb-6">

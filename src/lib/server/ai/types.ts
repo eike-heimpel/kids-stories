@@ -6,7 +6,6 @@ export interface AIAssistRequest {
     entityType: EntityType;
     prompt: string;
     currentData?: Record<string, any>;
-    quickAdjustments?: string[];
     additionalContext?: Record<string, any>;
 }
 

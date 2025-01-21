@@ -40,7 +40,6 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
             entityType: 'universe',
             prompt: requestData.prompt,
             currentData: requestData.currentData,
-            quickAdjustments: requestData.quickAdjustments,
             additionalContext: {
                 ...requestData.additionalContext,
                 universe: universeContext // Include the universe context

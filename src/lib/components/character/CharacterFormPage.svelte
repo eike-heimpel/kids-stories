@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Character } from '$lib/server/mongodb/types';
+	import type { Character } from '$lib/schemas/character';
 	import type { ObjectId } from 'mongodb';
 	import CharacterForm from './CharacterForm.svelte';
 	import EntityFormPage from '$lib/components/shared/EntityFormPage.svelte';
@@ -10,9 +10,10 @@
 	}
 
 	export let universe: UniverseInfo;
-	export let character: Partial<Character & { _id?: string | ObjectId }> = {
+	export let character: Partial<Character> = {
 		name: '',
 		description: '',
+		isPublic: false,
 		backstory: '',
 		traits: [],
 		abilities: [],
@@ -45,8 +46,8 @@
 >
 	<svelte:fragment slot="default" let:handleSubmit let:handleCancel>
 		<CharacterForm
-			{character}
-			onSubmit={(data) => handleSubmit(data as any)}
+			character={character as Character}
+			onSubmit={handleSubmit}
 			onCancel={handleCancel}
 		/>
 	</svelte:fragment>

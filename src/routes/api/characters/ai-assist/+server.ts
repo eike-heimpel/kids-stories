@@ -40,7 +40,6 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
             entityType: 'character',
             prompt: requestData.prompt,
             currentData: requestData.currentData,
-            quickAdjustments: requestData.quickAdjustments,
             additionalContext: {
                 ...requestData.additionalContext,
                 character: characterContext // Include the character context
