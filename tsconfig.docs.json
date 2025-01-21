@@ -1,0 +1,51 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2020",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true
+    },
+    "typedocOptions": {
+        "entryPoints": [
+            "src/lib/schemas/*.ts"
+        ],
+        "out": "docs",
+        "name": "Kids Stories Schema Documentation",
+        "excludePrivate": true,
+        "excludeProtected": true,
+        "plugin": [
+            "typedoc-plugin-zod"
+        ],
+        "theme": "default",
+        "skipErrorChecking": true,
+        "intentionallyNotExported": [
+            "Universe",
+            "UniverseForm"
+        ],
+        "readme": "none",
+        "sort": [
+            "source-order"
+        ],
+        "validation": {
+            "invalidLink": true,
+            "notDocumented": true
+        }
+    },
+    "include": [
+        "src/lib/schemas/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts",
+        "**/*.test.ts",
+        "src/routes/**/*",
+        "src/lib/server/**/*"
+    ]
+}

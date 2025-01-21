@@ -1,0 +1,37 @@
+{
+    "entryPoints": [
+        "src/lib/schemas/base.ts",
+        "src/lib/schemas/character.ts",
+        "src/lib/schemas/universe.ts",
+        "src/lib/server/middleware/validateSchema.ts"
+    ],
+    "out": "docs",
+    "name": "Kids Stories Schema Documentation",
+    "theme": "default",
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeExternals": true,
+    "includeVersion": true,
+    "navigationLinks": {
+        "Schema Overview": "pages/schema-overview.html",
+        "API Examples": "pages/examples.html",
+        "Schemas": "modules/schemas.html",
+        "Validation": "modules/middleware.html"
+    },
+    "categorizeByGroup": true,
+    "categoryOrder": [
+        "Schemas",
+        "Validation",
+        "Types",
+        "*"
+    ],
+    "sort": [
+        "source-order"
+    ],
+    "defaultCategory": "Other",
+    "readme": "src/lib/docs/examples.md",
+    "sidebarLinks": {
+        "Schema Overview": "pages/schema-overview.html",
+        "API Examples": "pages/examples.html"
+    }
+}

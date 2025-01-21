@@ -9,7 +9,23 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler"
+		"moduleResolution": "bundler",
+		"module": "esnext",
+		"target": "es2020",
+		"verbatimModuleSyntax": false
+	},
+	"typedocOptions": {
+		"entryPoints": [
+			"src/lib/schemas/*.ts"
+		],
+		"out": "docs",
+		"name": "Kids Stories Schema Documentation",
+		"excludePrivate": true,
+		"excludeProtected": true,
+		"plugin": [
+			"typedoc-plugin-zod"
+		],
+		"theme": "default"
 	}
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
