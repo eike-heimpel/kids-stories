@@ -80,4 +80,31 @@ export class CharacterService extends BaseService<Character> {
             'relationships.characterId': relatedCharacterId
         } as Filter<Character>, page, limit);
     }
+
+    // Add this method to the CharacterService class
+    async getBasicInfo(universeId: string) {
+        const characters = await this.collection
+            .find({ universeId }, {
+                projection: {
+                    _id: 1,
+                    name: 1,
+                    species: 1,
+                    status: 1,
+                    tags: 1
+                }
+            })
+            .toArray();
+
+        return characters.map(char => ({
+            _id: char._id.toString(),
+            name: char.name,
+            title: undefined,
+            type: 'character' as const,
+            displayInfo: {
+                species: char.species,
+                status: char.status,
+                tags: char.tags
+            }
+        }));
+    }
 } 

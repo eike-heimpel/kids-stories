@@ -21,8 +21,8 @@ export const fieldSelectionSchema = z.object({
 // Base Entity Schema (to be extended by specific entities)
 export const baseEntitySchema = z.object({
     _id: z.string().optional(),
-    createdAt: z.string().optional(), // Will be converted to Date
-    updatedAt: z.string().optional(), // Will be converted to Date
+    createdAt: z.date().optional(),
+    updatedAt: z.date().optional(),
     version: z.number().optional(),
     lastModifiedBy: z.string().optional(),
 });

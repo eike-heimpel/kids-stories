@@ -199,7 +199,7 @@ export abstract class AIService {
         formattedPrompt += this.formatEntitySpecificPrompt(request);
 
         if (additionalContext) {
-            formattedPrompt += `\nAdditional Context:\n${JSON.stringify(additionalContext)}\n`;
+            formattedPrompt += `\nAdditional Context on other entities and the universe this all plays in as a whole. Use it to keep everything consistent:\n${JSON.stringify(additionalContext)}\n`;
         }
 
         return formattedPrompt;

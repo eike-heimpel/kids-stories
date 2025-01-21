@@ -1,6 +1,5 @@
 import type { LLMContext } from '../mongodb/types';
-
-export type EntityType = 'universe' | 'character' | 'plot' | 'location' | 'event';
+import type { EntityType } from '$lib/types/entities';
 
 export interface AIAssistRequest {
     entityType: EntityType;
