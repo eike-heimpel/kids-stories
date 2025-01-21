@@ -229,6 +229,27 @@
 										<span class="sm:text-md truncate text-base font-medium">
 											{result.name || result.title}
 										</span>
+										<a
+											href="/private/universes/{$page.data.universe
+												._id}/{result.type}s/{result._id}"
+											class="btn btn-square btn-ghost btn-xs tooltip tooltip-right flex items-center justify-center"
+											data-tip="View details"
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-3 w-3"
+												viewBox="0 0 20 20"
+												fill="currentColor"
+											>
+												<path
+													fill-rule="evenodd"
+													d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+													clip-rule="evenodd"
+												/>
+											</svg>
+										</a>
 										{#if selectedTab === 'all'}
 											<span class="badge badge-sm sm:badge-lg">
 												{getEntityConfig(result.type)?.displayName || result.type}
@@ -236,10 +257,7 @@
 										{/if}
 									</div>
 								</div>
-								<button
-									class="btn btn-primary btn-sm ml-2"
-									on:click={() => addEntityToContext(result)}
-								>
+								<button class="btn btn-primary btn-sm" on:click={() => addEntityToContext(result)}>
 									Add
 								</button>
 							</div>
