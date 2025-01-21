@@ -1,15 +1,6 @@
 <script lang="ts">
-	import type { BaseDocument, LLMContext } from '$lib/server/mongodb/types';
+	import type { EntityWithCommon } from '$lib/types/forms';
 	import AIAssistModal from './AIAssistModal.svelte';
-
-	// Make the interface more lenient by making all fields optional
-	interface EntityWithCommon extends Partial<BaseDocument> {
-		name?: string;
-		title?: string;
-		isPublic?: boolean;
-		llmContext?: Partial<LLMContext>;
-		[key: string]: any; // Allow any additional fields
-	}
 
 	export let entity: EntityWithCommon;
 	export let entityType: 'universe' | 'character' | 'plot' | 'location' | 'event';

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { Universe } from '$lib/server/mongodb/types';
+	import type { EntityWithCommon } from '$lib/types/forms';
 	import LLMContextForm from '../shared/LLMContextForm.svelte';
 	import EntityForm from '../shared/EntityForm.svelte';
 	import { page } from '$app/stores';
 
 	export let universe: Universe;
-	export let onSubmit: (data: Universe) => void;
+	export let onSubmit: <T extends EntityWithCommon>(data: T) => void;
 	export let onCancel: () => void;
 
 	// Get query parameters if they exist
