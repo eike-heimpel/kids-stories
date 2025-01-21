@@ -162,7 +162,6 @@
 
 <AIAssistModal
 	bind:show={showAIAssist}
-	currentContext={entity.llmContext}
 	{entityType}
 	onClose={() => (showAIAssist = false)}
 	onApply={handleAIChanges}
