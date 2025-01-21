@@ -40,7 +40,6 @@ export const POST: RequestHandler = async ({ request, params }) => {
         // Initialize services
         const characterService = new CharacterService();
         const universeService = new UniverseService();
-
         // Fetch universe data first
         const universe = universeId ? await universeService.findById(new ObjectId(universeId)) : null;
 

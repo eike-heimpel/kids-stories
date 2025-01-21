@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     return {
         universe: {
             ...universe,
-            _id: universe?._id?.toString()
+            _id: universe?._id?.toString() ?? params.universeId
         }
     };
 }; 

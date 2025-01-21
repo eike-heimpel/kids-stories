@@ -46,10 +46,7 @@ export async function PUT({ params, request, locals }) {
         const universe = await universeService.update(new ObjectId(params.id), {
             ...data,
             lastModifiedBy: userId,
-            version: existingUniverse.version + 1,
-            // Preserve creator ID
             creatorId: existingUniverse.creatorId,
-            // Ensure llmContext exists
             llmContext: {
                 shortDescription: data.llmContext?.shortDescription || data.description.substring(0, 100),
                 ...data.llmContext

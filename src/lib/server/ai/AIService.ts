@@ -8,6 +8,7 @@ import type {
     LLMContext
 } from './types';
 import { error } from '@sveltejs/kit';
+import { Universe, UniverseForm } from '$lib/schemas/universe';
 
 export abstract class AIService {
     protected openai: OpenAI;
@@ -229,7 +230,7 @@ export abstract class AIService {
 
         // Get language from current data if it exists
         const language = (request.currentData as any)?.language;
-        const systemPrompt = `You are a helpful AI that identifies which fields should be updated based on user prompts. Only select fields that are directly relevant to the user's request, except for those that are under LLM Context, those you can more liberally select. You MUST respond in ${language} language only.`
+        const systemPrompt = `You are a helpful AI that identifies which fields should be updated based on user prompts. Only select fields that are directly relevant to the user's request, except for those that are under LLM Context, those you can more liberally select.`
             ;
 
         const response = await this.openai.chat.completions.create({
@@ -268,12 +269,14 @@ export abstract class AIService {
     ): Promise<Record<string, any>> {
         // Create a schema that only includes the fields we want to update
         const restrictedSchema = this.createRestrictedSchema(fieldsToUpdate);
-
         // Get language from current data if it exists
-        const language = (request.currentData as any)?.language;
-        const systemPrompt = language
-            ? `You are a helpful AI that generates content for ${request.entityType} fields. Only generate content for the specified fields. You MUST respond in ${language} language only.`
-            : `You are a helpful AI that generates content for ${request.entityType} fields. Only generate content for the specified fields.`;
+        const language = request.additionalContext?.entities.universe.language;
+        const minAge = (request.additionalContext?.entities.universe as Universe).targetAgeRange.min;
+        const maxAge = (request.additionalContext?.entities.universe as Universe).targetAgeRange.max;
+        const systemPrompt = `You are a helpful AI that generates content for ${request.entityType} fields. 
+        Only generate content for the specified fields. You MUST respond in ${language} language only.
+        It is of utmost importance that your content is appropriate for ${minAge} year olds, while 
+        still being engaging and interesting for ${maxAge} year olds.`
 
         const response = await this.openai.chat.completions.create({
             model: this.config.model,

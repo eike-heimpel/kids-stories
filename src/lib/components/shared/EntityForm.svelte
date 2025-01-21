@@ -167,5 +167,4 @@
 	onClose={() => (showAIAssist = false)}
 	onApply={handleAIChanges}
 	currentData={entity}
-	universeId={entity._id?.toString()}
 />

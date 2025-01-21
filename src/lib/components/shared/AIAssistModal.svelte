@@ -3,6 +3,7 @@
 	import { addToast } from '$lib/components/toastStore';
 	import { getAllEntityTypes, getEntityConfig, type EntityTypeConfig } from '$lib/types/entities';
 	import { entityMetadata } from '$lib/stores/entityMetadata';
+	import { page } from '$app/stores';
 
 	export let show = false;
 	export let currentContext: Partial<LLMContext> = {};
@@ -10,7 +11,6 @@
 	export let onClose: () => void;
 	export let onApply: (changes: Record<string, any>) => void;
 	export let currentData: Record<string, any> = {};
-	export let universeId: string | undefined = undefined;
 
 	/**
 	 * A list of "quick adjust" options passed in from the parent,
@@ -37,7 +37,7 @@
 		}
 
 		const query = searchQuery.toLowerCase();
-		const excluded = new Set([currentData._id, ...additionalContextEntities.map((e) => e._id)]);
+		const excluded = new Set([currentData._id]);
 
 		// Filter entities based on search criteria
 		searchResults = $entityMetadata
@@ -109,7 +109,7 @@
 					additionalContext: {
 						entities: additionalContextEntities
 					},
-					universeId
+					universeId: $page.data.universe._id
 				})
 			});
 

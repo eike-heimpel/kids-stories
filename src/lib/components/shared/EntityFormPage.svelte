@@ -49,7 +49,6 @@
 
 			// Invalidate both the parent route and the layout data
 			if (parent) {
-				invalidateAll();
 				await Promise.all([invalidate(returnPath), invalidate(layoutBasePath)]);
 			}
 

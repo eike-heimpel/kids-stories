@@ -9,6 +9,7 @@ export const load: LayoutServerLoad = async ({ params, parent }) => {
     const parentData = await parent();
     const universe = parentData.universe;
 
+
     if (!universe?._id) {
         throw error(404, 'Universe not found');
     }
@@ -21,6 +22,6 @@ export const load: LayoutServerLoad = async ({ params, parent }) => {
         characters: result.items.map((char: Character) => ({
             ...char,
             _id: char._id?.toString()
-        }))
+        })),
     };
 }; 
