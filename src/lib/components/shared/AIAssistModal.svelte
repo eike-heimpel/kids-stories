@@ -66,6 +66,7 @@
 
 	function handleApply() {
 		if (previewChanges) {
+			// Dispatch the changes before closing
 			onApply(previewChanges);
 		}
 		onClose();

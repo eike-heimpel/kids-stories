@@ -71,20 +71,5 @@
 </script>
 
 <div class="container mx-auto max-w-4xl p-4">
-	<div class="card bg-base-100 shadow-xl">
-		<div class="card-body">
-			<h2 class="card-title text-3xl">{isEdit ? 'Edit' : 'Create New'} {entityType}</h2>
-			{#if parent}
-				<p class="opacity-60">
-					{#if isEdit}
-						Editing {entity.name || ''} in {parent.name}
-					{:else}
-						Add a new {entityType} to {parent.name}
-					{/if}
-				</p>
-			{/if}
-
-			<slot {handleSubmit} {handleCancel} />
-		</div>
-	</div>
+	<slot {handleSubmit} {handleCancel} />
 </div>

@@ -3,6 +3,7 @@
 	import type { Readable } from 'svelte/store';
 	import AIAssistModal from './AIAssistModal.svelte';
 	import { addToast } from '$lib/components/toastStore';
+	import { createEventDispatcher } from 'svelte';
 
 	type T = EntityWithCommon;
 	type ValidationState = {
@@ -23,6 +24,8 @@
 
 	let isSubmitting = false;
 	let showAIAssist = false;
+
+	const dispatch = createEventDispatcher();
 
 	// Handle form submission
 	async function handleSubmit() {
@@ -64,7 +67,7 @@
 		for (const [key, value] of Object.entries(changes)) {
 			if (value instanceof Object && !Array.isArray(value)) {
 				// For objects (like llmContext), do a deep merge
-				updatedEntity[key] = deepMerge(entity[key] || {}, value);
+				updatedEntity[key] = deepMerge(updatedEntity[key] || {}, value);
 			} else {
 				// For arrays and primitive values, replace directly
 				updatedEntity[key] = value;
@@ -72,7 +75,10 @@
 		}
 
 		// Update the entity with all changes at once
-		Object.assign(entity, updatedEntity);
+		entity = updatedEntity;
+
+		// Dispatch aichanges event to notify parent components
+		dispatch('aichanges', changes);
 	}
 
 	// Deep merge function for objects

@@ -1,7 +1,9 @@
 import type { BaseDocument, LLMContext } from '$lib/server/mongodb/types';
+import type { ObjectId } from 'mongodb';
 
 // Base interface for all entities
-export interface EntityWithCommon extends Partial<BaseDocument> {
+export interface EntityWithCommon extends Omit<Partial<BaseDocument>, '_id'> {
+    _id?: ObjectId | string;
     name: string;
     description: string;
     isPublic?: boolean;

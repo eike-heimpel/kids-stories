@@ -44,23 +44,19 @@
 		const changes = event.detail;
 
 		// Update character fields if present in changes
-		if (changes.traits) {
-			character.traits = changes.traits || [];
-		}
-		if (changes.abilities) {
-			character.abilities = changes.abilities || [];
-		}
-		if (changes.backstory) {
-			character.backstory = changes.backstory;
-		}
-		if (changes.llmContext) {
-			character.llmContext = {
-				...(character.llmContext || {}),
-				...changes.llmContext,
-				shortDescription:
-					changes.llmContext.shortDescription || character.llmContext.shortDescription || ''
-			};
-		}
+		Object.entries(changes).forEach(([key, value]) => {
+			if (key === 'llmContext') {
+				character.llmContext = {
+					...(character.llmContext || {}),
+					...value,
+					shortDescription: value.shortDescription || character.llmContext?.shortDescription || ''
+				};
+			} else {
+				character[key] = value;
+			}
+		});
+
+		// Trigger validation after updates
 		validation.validate(character);
 	}
 
