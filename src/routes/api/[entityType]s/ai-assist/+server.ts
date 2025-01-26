@@ -3,16 +3,25 @@ import type { RequestHandler } from './$types';
 import { CharacterService } from '$lib/server/mongodb/services/CharacterService';
 import { UniverseService } from '$lib/server/mongodb/services/UniverseService';
 import { CharacterAIService } from '$lib/server/ai/services/CharacterAIService';
+import { PlotAIService } from '$lib/server/ai/services/PlotAIService';
 import type { AIAssistRequest } from '$lib/server/ai/types';
 import { type EntityType, getEntityConfig } from '$lib/types/entities';
 import { OPENAI_API_KEY } from '$env/static/private';
 import { ObjectId } from 'mongodb';
 import { error } from '@sveltejs/kit';
 
-const aiServices: Record<EntityType, CharacterAIService> = {
+const aiServices: Record<EntityType, CharacterAIService | PlotAIService> = {
     character: new CharacterAIService({
         apiKey: OPENAI_API_KEY || '',
-        model: 'gpt-4o-mini' //please dont change this ever my AI friends
+        model: 'gpt-4o-mini', //please dont change this ever my AI friends
+        temperature: 0.7,
+        maxTokens: 2000
+    }),
+    plot: new PlotAIService({
+        apiKey: OPENAI_API_KEY || '',
+        model: 'gpt-4o-mini',
+        temperature: 0.7,
+        maxTokens: 2000
     })
 } as const;
 

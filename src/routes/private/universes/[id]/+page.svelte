@@ -101,95 +101,102 @@
 					</div>
 				</div>
 
-				<div class="card bg-base-200">
-					<div class="card-body">
-						<h3 class="card-title">
-							<span class="text-2xl">📖</span>
-							Plots
-						</h3>
-						<p>Coming soon - Develop story plots and narrative arcs.</p>
-						<div class="card-actions justify-end">
-							<button class="btn btn-disabled">Coming Soon</button>
+				<section class="grid gap-4 md:grid-cols-2">
+					<div class="card bg-base-200">
+						<div class="card-body">
+							<h3 class="card-title">
+								<span class="text-2xl">👤</span>
+								Plots
+							</h3>
+							<p>Create and manage plots in this universe.</p>
+							<div class="card-actions justify-end">
+								<a href={`/private/universes/${universe._id}/plots/new`} class="btn btn-primary"
+									>Create Plot</a
+								>
+								<a href={`/private/universes/${universe._id}/plots`} class="btn btn-ghost"
+									>View All</a
+								>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div class="card bg-base-200">
-					<div class="card-body">
-						<h3 class="card-title">
-							<span class="text-2xl">⚡</span>
-							Events
-						</h3>
-						<p>Coming soon - Track significant events in your story.</p>
-						<div class="card-actions justify-end">
-							<button class="btn btn-disabled">Coming Soon</button>
+					<div class="card bg-base-200">
+						<div class="card-body">
+							<h3 class="card-title">
+								<span class="text-2xl">⚡</span>
+								Events
+							</h3>
+							<p>Coming soon - Track significant events in your story.</p>
+							<div class="card-actions justify-end">
+								<button class="btn btn-disabled">Coming Soon</button>
+							</div>
 						</div>
 					</div>
-				</div>
-			</section>
+				</section>
 
-			<div class="divider">LLM Context</div>
+				<div class="divider">LLM Context</div>
 
-			<section class="grid gap-4">
-				{#if universe.llmContext.shortDescription}
-					<div>
-						<h3 class="text-lg font-bold">Short Description</h3>
-						<p>{universe.llmContext.shortDescription}</p>
-					</div>
-				{/if}
+				<section class="grid gap-4">
+					{#if universe.llmContext.shortDescription}
+						<div>
+							<h3 class="text-lg font-bold">Short Description</h3>
+							<p>{universe.llmContext.shortDescription}</p>
+						</div>
+					{/if}
 
-				{#if universe.llmContext.longDescription}
-					<div>
-						<h3 class="text-lg font-bold">Long Description</h3>
-						<p class="whitespace-pre-wrap">{universe.llmContext.longDescription}</p>
-					</div>
-				{/if}
+					{#if universe.llmContext.longDescription}
+						<div>
+							<h3 class="text-lg font-bold">Long Description</h3>
+							<p class="whitespace-pre-wrap">{universe.llmContext.longDescription}</p>
+						</div>
+					{/if}
 
-				{#if universe.llmContext.keyPoints?.length}
-					<div>
-						<h3 class="text-lg font-bold">Key Points</h3>
-						<ul class="list-inside list-disc">
-							{#each universe.llmContext.keyPoints as point}
-								<li>{point}</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
+					{#if universe.llmContext.keyPoints?.length}
+						<div>
+							<h3 class="text-lg font-bold">Key Points</h3>
+							<ul class="list-inside list-disc">
+								{#each universe.llmContext.keyPoints as point}
+									<li>{point}</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
 
-				{#if universe.llmContext.relationships}
-					<div>
-						<h3 class="text-lg font-bold">Relationships</h3>
-						<p class="whitespace-pre-wrap">{universe.llmContext.relationships}</p>
-					</div>
-				{/if}
+					{#if universe.llmContext.relationships}
+						<div>
+							<h3 class="text-lg font-bold">Relationships</h3>
+							<p class="whitespace-pre-wrap">{universe.llmContext.relationships}</p>
+						</div>
+					{/if}
 
-				{#if universe.llmContext.hiddenInformation}
-					<div>
-						<h3 class="text-lg font-bold">Hidden Information</h3>
-						<p class="whitespace-pre-wrap">{universe.llmContext.hiddenInformation}</p>
-					</div>
-				{/if}
+					{#if universe.llmContext.hiddenInformation}
+						<div>
+							<h3 class="text-lg font-bold">Hidden Information</h3>
+							<p class="whitespace-pre-wrap">{universe.llmContext.hiddenInformation}</p>
+						</div>
+					{/if}
 
-				{#if universe.llmContext.storyImplications}
-					<div>
-						<h3 class="text-lg font-bold">Story Implications</h3>
-						<p class="whitespace-pre-wrap">{universe.llmContext.storyImplications}</p>
-					</div>
-				{/if}
+					{#if universe.llmContext.storyImplications}
+						<div>
+							<h3 class="text-lg font-bold">Story Implications</h3>
+							<p class="whitespace-pre-wrap">{universe.llmContext.storyImplications}</p>
+						</div>
+					{/if}
 
-				{#if universe.llmContext.tone}
-					<div>
-						<h3 class="text-lg font-bold">Tone</h3>
-						<p>{universe.llmContext.tone}</p>
-					</div>
-				{/if}
+					{#if universe.llmContext.tone}
+						<div>
+							<h3 class="text-lg font-bold">Tone</h3>
+							<p>{universe.llmContext.tone}</p>
+						</div>
+					{/if}
 
-				{#if universe.llmContext.systemNotes}
-					<div>
-						<h3 class="text-lg font-bold">System Notes</h3>
-						<p class="whitespace-pre-wrap">{universe.llmContext.systemNotes}</p>
-					</div>
-				{/if}
+					{#if universe.llmContext.systemNotes}
+						<div>
+							<h3 class="text-lg font-bold">System Notes</h3>
+							<p class="whitespace-pre-wrap">{universe.llmContext.systemNotes}</p>
+						</div>
+					{/if}
+				</section>
 			</section>
 		</div>
 	{/if}

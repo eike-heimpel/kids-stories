@@ -119,23 +119,25 @@
 	</div>
 
 	<!-- Common Fields -->
-	<div class="form-control">
-		<label class="label" for="name">
-			<span class="label-text">{entityType} Name <span class="text-error">*</span></span>
-		</label>
-		<input
-			type="text"
-			id="name"
-			class="input input-bordered"
-			class:input-error={$validation?.getFieldError('name')}
-			bind:value={entity.name}
-		/>
-		{#if $validation?.getFieldError('name')}
-			<label class="label">
-				<span class="label-text-alt text-error">{$validation.getFieldError('name')}</span>
+	<slot name="name-field">
+		<div class="form-control">
+			<label class="label" for="name">
+				<span class="label-text">{entityType} Name <span class="text-error">*</span></span>
 			</label>
-		{/if}
-	</div>
+			<input
+				type="text"
+				id="name"
+				class="input input-bordered"
+				class:input-error={$validation?.getFieldError('name')}
+				bind:value={entity.name}
+			/>
+			{#if $validation?.getFieldError('name')}
+				<label class="label">
+					<span class="label-text-alt text-error">{$validation.getFieldError('name')}</span>
+				</label>
+			{/if}
+		</div>
+	</slot>
 
 	<!-- Slot for entity-specific fields -->
 	<slot />

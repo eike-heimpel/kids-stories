@@ -7,7 +7,7 @@
 	export let label: string;
 	export let validation: { getFieldError: (path: string) => string | undefined } | undefined =
 		undefined;
-	export let type: 'text' | 'textarea' | 'number' | 'url' = 'text';
+	export let type: 'text' | 'number' | 'textarea' | 'url' | 'datetime-local' = 'text';
 	export let value: any;
 	export let placeholder = '';
 

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { addToast } from '$lib/components/toastStore';
 	import type { BaseDocument } from '$lib/server/mongodb/types';
 	import type { ObjectId } from 'mongodb';
+	import { enhance } from '$app/forms';
 
 	// Base interface for any entity
 	interface EntityInfo {
@@ -27,33 +28,34 @@
 
 	async function handleSubmit(entityData: EntityInfo) {
 		try {
-			const endpoint = isEdit ? `${basePath}/${entity._id}` : basePath;
+			const form = new FormData();
+			form.append('data', JSON.stringify(entityData));
 
-			const response = await fetch(endpoint, {
-				method: isEdit ? 'PUT' : 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(entityData)
+			const response = await fetch('?/default', {
+				method: 'POST',
+				body: form
 			});
 
 			if (!response.ok) {
 				throw new Error(await response.text());
 			}
 
-			const savedEntity = await response.json();
-			const entityId = savedEntity._id?.toString() || savedEntity._id;
+			const result = await response.json();
+			if (result.success) {
+				// Show success message
+				addToast(`${entityType} ${isEdit ? 'updated' : 'created'} successfully`, 'success');
 
-			// Show success message
-			addToast(`${entityType} ${isEdit ? 'updated' : 'created'} successfully`, 'success');
+				// Invalidate both the parent route and the layout data
+				if (parent) {
+					await Promise.all([invalidate(returnPath), invalidate(layoutBasePath)]);
+				}
 
-			// Invalidate both the parent route and the layout data
-			if (parent) {
-				await Promise.all([invalidate(returnPath), invalidate(layoutBasePath)]);
+				// Navigate to the entity detail view
+				const entityId = result[entityType]._id;
+				await goto(`${basePath}/${entityId}`);
+			} else {
+				throw new Error(result.error || 'Failed to save');
 			}
-
-			// Navigate to the entity detail view
-			await goto(`${basePath}/${entityId}`);
 		} catch (e) {
 			console.error(`Error ${isEdit ? 'updating' : 'creating'} ${entityType}:`, e);
 			addToast(
