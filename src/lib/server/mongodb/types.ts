@@ -1,5 +1,13 @@
 import type { ObjectId } from 'mongodb';
 
+// Fields that should never be updated directly
+export type ImmutableFields = '_id' | 'createdAt' | 'version';
+// Fields that are managed by the system
+export type SystemManagedFields = 'updatedAt' | 'lastModifiedBy';
+
+// Type for safe updates that excludes immutable and system-managed fields
+export type SafeUpdateFields<T> = Omit<T, ImmutableFields | SystemManagedFields>;
+
 export interface BaseDocument {
     _id?: ObjectId;
     createdAt: Date;

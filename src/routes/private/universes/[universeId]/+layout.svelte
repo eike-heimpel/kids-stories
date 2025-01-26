@@ -9,13 +9,6 @@
 
 <div class="container mx-auto p-4">
 	<header class="mb-8">
-		<nav class="breadcrumbs mb-4 text-sm">
-			<ul>
-				<li><a href="/private">Home</a></li>
-				<li><a href="/private/universes">Universes</a></li>
-				<li>{universe.name}</li>
-			</ul>
-		</nav>
 		<h1 class="mb-2 text-3xl font-bold">{universe.name}</h1>
 		<div class="tabs">
 			<a

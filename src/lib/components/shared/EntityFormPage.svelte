@@ -31,13 +31,14 @@
 			const form = new FormData();
 			form.append('data', JSON.stringify(entityData));
 
-			const response = await fetch('?/default', {
+			const response = await fetch('?/save', {
 				method: 'POST',
 				body: form
 			});
 
 			if (!response.ok) {
-				throw new Error(await response.text());
+				const text = await response.text();
+				throw new Error(text || `Failed to ${isEdit ? 'update' : 'create'} ${entityType}`);
 			}
 
 			const result = await response.json();
@@ -54,7 +55,8 @@
 				const entityId = result[entityType]._id;
 				await goto(`${basePath}/${entityId}`);
 			} else {
-				throw new Error(result.error || 'Failed to save');
+				// Use the error message from the response if available
+				throw new Error(result.error || `Failed to ${isEdit ? 'update' : 'create'} ${entityType}`);
 			}
 		} catch (e) {
 			console.error(`Error ${isEdit ? 'updating' : 'creating'} ${entityType}:`, e);
@@ -62,6 +64,7 @@
 				e instanceof Error ? e.message : `Failed to ${isEdit ? 'update' : 'create'} ${entityType}`,
 				'error'
 			);
+			throw e; // Re-throw to prevent form from resetting
 		}
 	}
 

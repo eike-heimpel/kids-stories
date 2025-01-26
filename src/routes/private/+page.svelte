@@ -60,12 +60,7 @@
 				<button class="btn btn-primary" on:click={handleCreate}>Create New Universe</button>
 			</div>
 
-			<EntityList
-				items={universes}
-				title="Story Universes"
-				entityType="universe"
-				showCreateButton={false}
-			/>
+			<EntityList items={universes} entityType="universe" showCreateButton={false} />
 		</div>
 
 		<div class="mt-12 rounded-box bg-base-200 p-6">

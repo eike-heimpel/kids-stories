@@ -1,5 +1,5 @@
 import type { Collection, ObjectId, Filter, WithId, UpdateFilter, OptionalUnlessRequiredId } from 'mongodb';
-import type { BaseDocument } from '../types';
+import type { BaseDocument, SafeUpdateFields, ImmutableFields, SystemManagedFields } from '../types';
 
 export abstract class BaseService<T extends BaseDocument> {
     protected collection: Collection<T>;
@@ -46,17 +46,33 @@ export abstract class BaseService<T extends BaseDocument> {
         } as unknown as T;
     }
 
-    async update(id: ObjectId, update: Partial<Omit<T, '_id' | 'createdAt'>> & { lastModifiedBy: string }): Promise<T | null> {
+    async update(id: ObjectId, update: Partial<SafeUpdateFields<T>> & { lastModifiedBy: string }): Promise<T | null> {
+        // Ensure we're not trying to update any immutable or system-managed fields
+        const { lastModifiedBy, _id, createdAt, version, updatedAt, ...updateData } = update as any;
+
+        // Get the current document to ensure we have the correct version
+        const current = await this.findById(id);
+        if (!current) {
+            return null;
+        }
+
         const result = await this.collection.findOneAndUpdate(
-            { _id: id } as Filter<T>,
+            {
+                _id: id,
+                version: current.version // Optimistic concurrency control
+            } as Filter<T>,
             {
                 $set: {
-                    ...update,
-                    updatedAt: new Date()
+                    ...updateData,
+                    updatedAt: new Date(),
+                    lastModifiedBy
                 },
                 $inc: { version: 1 }
             } as unknown as UpdateFilter<T>,
-            { returnDocument: 'after' }
+            {
+                returnDocument: 'after',
+                upsert: false // Never create a new document
+            }
         );
 
         return result && (result as WithId<T>) as T;

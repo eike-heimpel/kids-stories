@@ -30,7 +30,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions: Actions = {
-    create: async ({ request, params, locals }) => {
+    save: async ({ request, params, locals }) => {
         const formData = await request.formData();
         const data = JSON.parse(formData.get('data') as string);
 
@@ -60,4 +60,4 @@ export const actions: Actions = {
             };
         }
     }
-}; 
+};

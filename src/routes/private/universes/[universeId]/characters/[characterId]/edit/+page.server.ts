@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
 import { CharacterService } from '$lib/server/mongodb/services/CharacterService';
 import { ObjectId } from 'mongodb';
 
@@ -23,4 +23,42 @@ export const load: PageServerLoad = async ({ params, parent }) => {
         },
         universe: parentData.universe
     };
+};
+
+export const actions: Actions = {
+    save: async ({ request, params }) => {
+        const formData = await request.formData();
+        const data = JSON.parse(formData.get('data') as string);
+
+        try {
+            const result = await characterService.update(
+                new ObjectId(data._id),
+                {
+                    ...data,
+                    lastModifiedBy: data.creatorId // Required by BaseService
+                }
+            );
+
+            if (!result || !result._id) {
+                return {
+                    success: false,
+                    error: 'Failed to update character'
+                };
+            }
+
+            return {
+                success: true,
+                character: {
+                    ...result,
+                    _id: result._id.toString()
+                }
+            };
+        } catch (err) {
+            console.error('Error updating character:', err);
+            return {
+                success: false,
+                error: 'Failed to update character'
+            };
+        }
+    }
 };

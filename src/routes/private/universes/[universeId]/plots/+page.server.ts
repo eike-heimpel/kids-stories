@@ -1,8 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { PlotService } from '$lib/server/mongodb/services/PlotService';
-import type { PageServerLoad, Actions } from './$types';
-import type { Plot } from '$lib/schemas/plot';
-import { ObjectId } from 'mongodb';
+import type { PageServerLoad } from './$types';
 
 const plotService = new PlotService();
 
@@ -29,44 +27,3 @@ export const load: PageServerLoad = async ({ params }: LoadParams) => {
         throw error(500, 'Failed to load plots');
     }
 };
-
-export const actions: Actions = {
-    create: async ({ request, params }) => {
-        const formData = await request.json();
-        try {
-            // For new plots
-            if (!formData._id) {
-                const result = await plotService.create({
-                    ...formData,
-                    universeId: params.universeId
-                });
-                return {
-                    success: true,
-                    plot: {
-                        ...result,
-                        _id: result._id?.toString() ?? ''
-                    }
-                };
-            }
-
-            // For existing plots
-            const result = await plotService.update(
-                new ObjectId(formData._id),
-                formData
-            );
-            return {
-                success: true,
-                plot: result ? {
-                    ...result,
-                    _id: result._id?.toString() ?? ''
-                } : null
-            };
-        } catch (err) {
-            console.error('Error saving plot:', err);
-            return {
-                success: false,
-                error: 'Failed to save plot'
-            };
-        }
-    }
-}; 

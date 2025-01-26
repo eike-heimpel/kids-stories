@@ -13,8 +13,7 @@
 	}
 
 	export let items: ListItem[] = [];
-	export let title: string;
-	export let entityType: 'universe' | 'character' = 'universe';
+	export let entityType: 'universe' | 'character' | 'plot' = 'universe';
 	export let showCreateButton = true;
 
 	// Get the current base path
@@ -92,12 +91,7 @@
 </script>
 
 <div class="p-4">
-	<div class="mb-4 flex items-center justify-between">
-		<h1 class="text-2xl font-bold">{title}</h1>
-		{#if showCreateButton}
-			<button class="btn btn-primary" on:click={handleCreate}> Create New </button>
-		{/if}
-	</div>
+	<div class="mb-4 flex items-center justify-between"></div>
 
 	<div class="form-control mb-4 w-full max-w-xs">
 		<input

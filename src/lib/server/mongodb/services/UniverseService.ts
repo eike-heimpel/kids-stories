@@ -8,26 +8,6 @@ export class UniverseService extends BaseService<Universe> {
         super(universes);
     }
 
-    // Override update to handle version conflicts
-    async update(id: ObjectId, update: Partial<Omit<Universe, '_id' | 'createdAt'>> & { lastModifiedBy: string }): Promise<Universe | null> {
-        // Remove version from update data if it exists
-        const { version, ...updateData } = update;
-
-        const result = await this.collection.findOneAndUpdate(
-            { _id: id } as Filter<Universe>,
-            {
-                $set: {
-                    ...updateData,
-                    updatedAt: new Date()
-                },
-                $inc: { version: 1 }
-            },
-            { returnDocument: 'after' }
-        );
-
-        return result;
-    }
-
     // Find universes by creator
     async findByCreator(creatorId: string, page = 1, limit = 10) {
         return this.find({ creatorId } as Filter<Universe>, page, limit);
