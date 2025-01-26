@@ -91,6 +91,7 @@ export interface Character extends BaseDocument {
 
 export interface Location extends BaseDocument {
     universeId: string;
+    creatorId: string;  // Add explicit creatorId field
     name: string;
     description: string;
     llmContext: LLMContext;
@@ -116,6 +117,7 @@ export interface Location extends BaseDocument {
 
 export interface Plot extends BaseDocument {
     universeId: string;
+    creatorId: string;  // Add explicit creatorId field
     title: string;
     summary: string;
     llmContext: LLMContext;
@@ -158,6 +160,7 @@ export interface Plot extends BaseDocument {
 
 export interface Event extends BaseDocument {
     universeId: string;
+    creatorId: string;  // Add explicit creatorId field
     title: string;
     description: string;
     llmContext: LLMContext;
@@ -186,6 +189,7 @@ export interface Event extends BaseDocument {
 
 export interface WorldRule extends BaseDocument {
     universeId: string;
+    creatorId: string;  // Add explicit creatorId field
     name: string;
     description: string;
     llmContext: LLMContext;
