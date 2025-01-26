@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { CharacterService } from '$lib/server/mongodb/services/CharacterService';
 import { ObjectId } from 'mongodb';
+import type { Character } from '$lib/server/mongodb/types';
 
 const characterService = new CharacterService();
 
@@ -48,10 +49,6 @@ export const actions: Actions = {
 
             return {
                 success: true,
-                character: {
-                    ...result,
-                    _id: result._id.toString()
-                }
             };
         } catch (err) {
             console.error('Error updating character:', err);

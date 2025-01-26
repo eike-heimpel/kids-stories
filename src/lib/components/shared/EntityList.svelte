@@ -66,6 +66,7 @@
 		const id = itemToDelete._id;
 
 		try {
+			console.log(apiPath);
 			const response = await fetch(`${apiPath}/${id}`, {
 				method: 'DELETE'
 			});

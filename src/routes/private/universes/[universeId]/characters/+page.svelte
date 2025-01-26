@@ -14,10 +14,5 @@
 		</a>
 	</div>
 
-	<EntityList
-		items={characters}
-		title="Characters"
-		entityType="character"
-		showCreateButton={false}
-	/>
+	<EntityList items={characters} entityType="character" showCreateButton={false} />
 </div>

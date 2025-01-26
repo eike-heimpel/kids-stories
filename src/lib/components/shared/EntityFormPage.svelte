@@ -42,7 +42,7 @@
 			}
 
 			const result = await response.json();
-			if (result.success) {
+			if (result.type === 'success') {
 				// Show success message
 				addToast(`${entityType} ${isEdit ? 'updated' : 'created'} successfully`, 'success');
 
@@ -50,10 +50,8 @@
 				if (parent) {
 					await Promise.all([invalidate(returnPath), invalidate(layoutBasePath)]);
 				}
-
 				// Navigate to the entity detail view
-				const entityId = result[entityType]._id;
-				await goto(`${basePath}/${entityId}`);
+				await goto(`${basePath}/`);
 			} else {
 				// Use the error message from the response if available
 				throw new Error(result.error || `Failed to ${isEdit ? 'update' : 'create'} ${entityType}`);

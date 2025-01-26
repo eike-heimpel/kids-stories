@@ -43,14 +43,9 @@ export const actions: Actions = {
             };
 
             const result = await plotService.create(plotData);
-            const serializedResult = {
-                ...result,
-                _id: result._id?.toString() ?? ''
-            };
 
             return {
                 success: true,
-                plot: serializedResult
             };
         } catch (err) {
             console.error('Error creating plot:', err);

@@ -9,7 +9,7 @@ export type SystemManagedFields = 'updatedAt' | 'lastModifiedBy';
 export type SafeUpdateFields<T> = Omit<T, ImmutableFields | SystemManagedFields>;
 
 export interface BaseDocument {
-    _id?: ObjectId;
+    _id?: ObjectId | string;
     createdAt: Date;
     updatedAt: Date;
     version: number;    // Basic versioning support
